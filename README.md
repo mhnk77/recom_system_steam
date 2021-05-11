@@ -1,4 +1,4 @@
-# Sistema de Recomendación para videojuegos de plataforma Steam
+# Sistema de Recomendación para videojuegos de Steam
 
 ### Proyecto final Métodos Analíticos
 
