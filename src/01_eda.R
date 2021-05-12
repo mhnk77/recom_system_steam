@@ -20,6 +20,9 @@ dta <- read_rds('cache/training.rds') %>%
   left_join(cat_limpio)%>% 
   filter(playtime_forever > 0)
 
+dta %>% 
+  saveRDS('cache/data_clean.RDS')
+
 medias_apps <- dta %>% 
   group_by(app_name) %>% 
   summarise(media_app = mean(playtime_forever), num_app = n()) %>% 
