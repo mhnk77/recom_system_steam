@@ -18,10 +18,14 @@ cat_limpio %>%
 
 dta <- read_rds('cache/training.rds') %>% 
   left_join(cat_limpio)%>% 
-  filter(playtime_forever > 0)
+  filter(playtime_forever > 0) %>% 
+  group_by(steamid, app_name) %>% 
+  summarise_at(vars(playtime_forever), ~sum(.))
 
-dta %>% 
-  saveRDS('cache/data_clean.RDS')
+dta <- dta %>% 
+  ungroup()
+  
+dta %>% saveRDS('cache/data_clean.RDS')
 
 medias_apps <- dta %>% 
   group_by(app_name) %>% 
@@ -37,9 +41,11 @@ medias_apps %>%
 
 #Distribución horas de juego vs num de jugadores
 medias_apps %>% 
-  mutate(label)
+  # mutate(label)
   ggplot(aes(num_app, media_app))+
   geom_point(alpha = 0.1)+ 
   xlab("Número de jugadores") + 
-  ylab("Promedio de horas jugadas") 
+  ylab("Promedio de horas jugadas") +
+  scale_x_log10()+
+  scale_y_log10()
 
