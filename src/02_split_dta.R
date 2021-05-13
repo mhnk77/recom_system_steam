@@ -25,9 +25,14 @@ dta_val <- dta %>%
   semi_join(usuarios_val, by = "steamid") %>% 
   semi_join(apps_val, by = "app_name")
 
+
+dta_val %>% saveRDS('cache/dta_validation.RDS')
+
 dta_train <- dta %>% 
-  anti_join(dta_val, by = c("steamid", "appid", "playtime_forever", "app_name"))
+  anti_join(dta_val, by = c("steamid", "playtime_forever", "app_name"))
+
+nrow(dta_val)/nrow(dta)
 
 
-
+dta_train %>% saveRDS('cache/dta_train.RDS')
 
