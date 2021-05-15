@@ -1,0 +1,77 @@
+---
+title: "Consideraciones MH"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data gathering and cleaning
+
+En un principio se intentó descargar datos a través de la API de Steam, sin embargo, las cuentas tienen un límite de 100k consultas por día, lo cual imposibilitó la tarea.
+
+Posteriormente, se descargó el dataset de https://steam.internet.byu.edu/, el cual se captó para realizar un paper llamado "Condensing Steam".
+
+La base pesa 17.5GB comprimida, y 160GB ya al descomprimirse, y está en formato .sql. Para utilizarla, fue necesario restaurarla utilizando el sistema manejador de bases de datos MariaDB, el cual opera basado en MySQL.
+
+Se utilizan las tablas Games_1 y Games_2, que justo contienen los datos en formato que los necesitamos: El id del jugador, id del juego o app, y número de minutos jugados.
+
+La base contiene datos de 109 millones de usuarios, de los cuales se hizo una extracción de 800k usuarios únicos, de manera aleatoria.
+
+El diccionario que contiene la relación entre appid y el nombre del juego fue obtenida de https://github.com/dgibbs64/SteamCMD-AppID-List, y completada a mano con ayuda de la herramienta web https://steamdb.info/.
+
+Existen algunos juegos con el mismo nombre, pero con diferente appid, por lo cual se reindexa dicho catálogo, usando nombres de juegos únicos, y sumando el número de horas de todos los jugadores, en caso de que tuvieran tiempo de juego en un app que tuviera dos ids.
+
+## Análisis exploratorio de los datos
+
+
+## Modelado y metodología
+
+### Data splitting
+
+Para separar los datos en un conjunto de evaluación y entrenamiento se realizó el siguiente procedimiento:
+
+- Se elige el %50 de todos las apps disponibles en el dataset
+- Se elge el %50 de todos los usuarios disponibles en el dataset.
+
+El set de validación se construye tomando los registros que pertenecen a la intersección de ambos conjuntos definidos anteriormente. Al ser la intersección, el porcentaje de la base conservado es aprox $ .5 *.5 = .25 = 25\% $.
+
+El set de entrenamiento, entonces, se compone por todos los registros que NO pertenecen al set de validación.
+
+### ALS
+
+El sistema se crea por medio del algoritmo ALS (Alternating Least Squares), como se específica en el paper: ...pdf
+
+Para su implementación, se utiliza la función `spark.als()` del paquete `SparkR`, utilizando el argumento `implicit = TRUE`, para asegurarse de utilizar el algoritmo adecuado para calificaciones implícitas.
+
+Es importante mencionar que se dividió el número de minutos de juego a horas de juego, lo cual daba mejores resultados al momento de calcular las predicciones.
+
+Se probó con distintas combinaciones de valores para los siguientes parámetros:
+
+- alpha: El nivel de confianza que se tiene en las predicciones. [Insertar fórmula aquí]
+
+- lambda: El coeficiente utilizado para la regularización del modelo.
+
+- rank: El rango de la matriz de factores latentes.
+
+### Evaluación del modelo
+
+Se utiliza la función `SparkR::predict()` para obtener las predicciones del nivel de gusto en el conjunto de prueba.
+
+Adicional a esto, para cada usuario se toma una muestra aleatoria de $n = 40$ del conjunto de los 250 juegos o apps más populares, según el número total de horas de juego, del conjunto de entrenamiento.
+
+De esta manera, para cada usuario se calculan las predicciones del nivel de preferencia de los 40 juegos aleatorios que le fueron asignados, además de los juegos para los cuales se tiene información sobre el tiempo de juego.
+
+Como se explica en las notas y en el paper, se calcula una métrica de evaluación llamada `rank`, la cual consiste en rankear los niveles de preferencia de todos los juegos, por usuario. Posteriormente, se calcula el percentil de cada observación, por usuario, de manera que los juegos con mayor preferencia predicha tienen un percentil más bajo, y vice versa. De esta manera, mientras mejor sea la predicción, menor será el valor de `rank`
+
+Después, únicamente para los juegos que pertenecen al conjunto de prueba, se multiplica el número de horas jugadas por el percentil al cual corresponden. Y al final se divide entre el número total de horas jugadas.
+La idea intuitiva, es que, mientras más acierte el modelo en rankear correctamente los niveles de preferencia, más veces se multiplicarán por valores bajos de percentiles, obteniendo así mejores valores de "rank".
+
+Se conserva el modelo con mejor valor para la métrica de ajuste.
+
+
+
+
+
+
