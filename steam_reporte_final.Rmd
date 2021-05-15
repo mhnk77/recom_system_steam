@@ -22,13 +22,15 @@ library(tidyverse)
 
 # Trabajo previo (opcional)
 
+
+
 # Base de datos
 
-Los datos utilizados se obtuvieron de la base *Condensing Steam: Distilling the Diversity of Gamer Behavior*, que agrupa información de 108.7 millones de usuarios durante el periodo ***2008-2017*** de la plataforma de videojuegos Steam, con 716 millones de juegos y hasta 1.1 millones de años en horas jugadas.
+Los datos utilizados se obtuvieron de la base *Condensing Steam: Distilling the Diversity of Gamer Behavior*, que agrupa información histórica de 108.7 millones de usuarios recolectados en 2014 de la plataforma de videojuegos Steam, con 716 millones de juegos y hasta 1.1 millones de años en horas jugadas.
 
 La base original está compuesta de 11 tablas de datos que contienen información diversa sobre los usuarios y sus atributos (id, juegos jugados, horas jugadas, información geográfica, información sobre sus "amigos", entre otros.), así como de los juegos y sus características (género, desarrollador, editor, etc.).
 
-Para el presente proyecto, se utilizó un subconjunto de "Condensing Steam" tomando los años ***2014-2017***, QUE SE CREÓ DE LA SIGUIENTE FORMA 
+Para el presente proyecto, se utilizó un subconjunto de "Condensing Steam" tomando de manera aleatoria 800 mil usuarios contenidos en la base, QUE SE CREÓ DE LA SIGUIENTE FORMA 
 
 
 (MH)
@@ -50,7 +52,7 @@ dta_clean <- read_rds('cache/data_clean.rds')
 head(dta_clean)
 ```
 
-En total se tienen **732,759*** usuarios diferentes que interactúan con 4,133 videojuegos.
+Del total de los usuarios recolectados, se eliminaron aquellos que estaban registrados en la plataforma y tenían al menos algún videojuego registrado pero sin haberlo jugado. En ese sentido, se tienen 732,759 usuarios diferentes que interactúan con 4,133 videojuegos.
 
 ```{r}
 dim(dta_clean)
@@ -58,7 +60,7 @@ length(unique(dta_clean$steamid))
 length(unique(dta_clean$app_name))
 ```
 
-Respecto a las horas jugadas (playtime_forever), el resumen estadístico puede observarse a continuación:
+Respecto al número de minutos jugadas (playtime_forever), el resumen estadístico puede observarse a continuación:
 
 ```{r}
 summary(dta_clean$playtime_forever)
@@ -70,7 +72,7 @@ Los datos se dividen en un conjunto de entrenamiento que nos servirá para const
 
 Para ello, se extraen de manera aleatoria 50% de los usuarios de la plataforma (`steamid`), y después se extraen de manera aleatoria el 50% de los videojuegos (`app_name`). Se genera un nuevo conjunto de datos con la intersección de ambos subconjuntos que corresponde al conjunto de validación, mientras que el conjunto de entrenamiento se forma con los datos restantes.
 
-De esta forma, los datos de validación corresponden al 25% del total de los datos, que equivalen a 5.42 millones de observaciones, y los de entrenamiento al 75%, con 1.78 millones de observaciones.
+De esta forma, los datos de validación corresponden al 25% del total de los datos, que equivalen a 1.78 millones de observaciones, y los de entrenamiento al 75%, con 5.42 millones de observaciones.
 
 ```{r}
 dta_train <- read_rds('cache/dta_train.rds')
@@ -94,9 +96,9 @@ length(unique(dta_validation$app_name))
 
 Sistema de recomendación busca resolver el problema de "predecir la respuesta de personas a estímulos a los que no han sido expuestos, basados en respuesta a otros estímulos de esta y quizá otras personas similares". 
 
-El más común es el explícito, donde el usuario otorga una calificación al producto (típicamente en una escala del 1 a 5 estrellas), para lo cual se cuentan con modelos de recomendación y evaluación bien definidos a partir de dichas calificaciones explícitas.
+El más común es el explícito, donde el usuario otorga una calificación al producto (típicamente en una escala del 1 a 5 estrellas), para lo cual se cuentan con modelos de recomendación y métricas de evaluación (RMSE) bien definidas a partir de dichas calificaciones explícitas.
 
-Los sistemas de recomendación implícitos se refieren a contextos donde no se tiene una calificación/evaluación del producto explícitamente definida por el usuario, pero se tienen variables de acciones del usuario que reflejan la preferencia o popularidad del producto y que, en muchos casos, resultan más informativos que la calificación directa del usuario.
+Los sistemas de recomendación implícitos se refieren a contextos donde no se tiene una calificación/evaluación del producto explícitamente definida por el usuario, pero se tienen variables de acciones del usuario que reflejan la preferencia o popularidad del producto y que, en muchos casos, resultan más informativos que la calificación directa otorgoda por el usuario.
 
 Nuestro sistema de recomendación se construye utilizando las horas jugadas por un usuario para cada videojuego.
 
@@ -130,7 +132,7 @@ Así obtenemos una confianza mínima en $p_{u,i}$
 
 $C_{u,i}$mide la confianza en la observación $p_{u,i}$.
 
-$\alpha$ es un regularizador constante de la tasa de incremento de la variable. Es un coeficiente de confianza que aumenta mientras observamos más evidencia del sesgo positivo.
+$\alpha$ es un parámetro constante de la tasa de incremento de la variable. Es un coeficiente de confianza que aumenta mientras observamos más evidencia del sesgo positivo.
  
 Asumimos que las preferencias son el producto punto de $p_{u,i}\;=\;x_u^Ty_i$. Estos vectores corresponden al usuario $u$ y al artículo $i$
  
@@ -140,9 +142,9 @@ Donde $\lambda(\sum_{u}\|x_u\|^2\;+\;\sum_{i}\|y_u\|^2)$ es un parámetro de reg
 
 La función de pérdida que queremos minimizar contiene $m.n$ términos, donde $m$ es el número de usuarios y $n$ es el número de artículos. Esto implica que tenemos un número grande de términos que no podemos optimizar directamente con técnicas de optimización comunes como descenso en gradiente estocástico. Para optimizar utilizamos el algoritmo de Mínimos Cuadrados Alternados (ALS)
 
-## ALternating Least Squares (ALS)
+## Alternating Least Squares (ALS)
 
-ALS es la abreviatura de aternar mínimos cuadrados. Se refiere a un algoritmo de recomendación que utiliza las calificaciones d todos los usuarios observados para inferir las preferencias de cada usuario y recomendar productos adecuados para el usuario.
+ALS es la abreviatura de alternar mínimos cuadrados. Se refiere a un algoritmo de recomendación que utiliza las calificaciones de todos los usuarios observados para inferir las preferencias de cada usuario y recomendar productos adecuados para el usuario.
 
 Cuando hablamos de recomendación implícita, es un algoritmo capaz de identificar artículos similares y hacer recomendaciones para los usuarios.
 
@@ -159,44 +161,71 @@ $$
 $$
 Valores bajos de $\overline{rank}$ son más deseables, pues ellos indican que el orden de los juegos más utilizados están más cerca de la parte superior de la lista. 
 
-Podemos decir que $\overline{rank} \;=\;0$ para el mejor juego y $\overline{rank} \;=\;1$ para el peor. Los valores más bajos son obtenidos si los usuarios interactúan más con artículos que están encima en el ranking
+Podemos decir que $\overline{rank} \;=\;0$ para el mejor juego y $\overline{rank} \;=\;1$ para el peor. Los valores más bajos son obtenidos si los usuarios interactúan más con artículos que están encima en el ranking.
 
-
-COMO SE CONSTRUYÓ EL SISTEMA DE RECOMENDACIÓN
+NOTA. cambiar lado derecho de la ecuación a percentil u,i en lugar de rank u,i y explicar.
 
 PREPROCESAMIENTO DE DATOS (DIVIDIR ENTRE 60, NUMÉRICOS, ETC.)
 
-NORMALIZACIÓN
+NORMALIZACIÓN. SE REENUMERARON LOS IDS DE USUARIOS Y JUEGOS, PARA UTILIZAR EN SPARK.
 
-DEFINICIÓN DEL MODELO Y SUS PARÁMETROS, ALFA, LAMDA (REGULARIZACIÓN), ETC.
+Consideraciones sobre evaluación
 
-AGRUPACIÓN DE ITEMS SIMILARES (LATENTES)
-
-PROMEDIOS PONDERADOS
-
-EVALUACIÓN - RANKING
 
 # Resultados
 
 SISTEMA DE RECOMENDACIÓN
 
-VALOR DE 0.28
+Se corrieron XX configuraciones de modelos (y tabla)
 
-RECOMENDACIONES EXITOSAS DE ARTÍCULOS ESPECÍFICOS
+El mejor modelo: 
 
-FALLOS COMUNES
+- Lamda es el que más afecta los resultados. el rank si afecta pero no mucho. El valor de alpha fue el mejor 1 (default).
 
-CONSIDERACIONES
+- La mejor configuración fue lamda 150, rank 80, y alpha 1.
+
+- Gráfica rank vs count (cero donde mejor lo hace), por lo tanto esperaríamos mayor densidad en valores cercanos a cero.
+
+- Para un usuario particular (id = 15), el que más jugó le dio una recomendación alta. Otros ejemplos donde usuario jugó poquito y le dio
+
+VALOR DE 0.17 y explicación
+
+RECOMENDACIONES EXITOSAS DE ARTÍCULOS ESPECÍFICOS (tablas)
+
+ejemplo de FALLOS (tablas)
 
 
 # Conclusiones
 
-VENTAJA DE SISTEMA DE RECOMENDACIÓN IMPLICITO
+VENTAJA DE SISTEMA DE RECOMENDACIÓN IMPLICITO. puede ser más informativo
 
-DIFERENCIAS ESPECÍFICAS SOBRE RECOMENDACIÓN DE VIDEOJUEGOS Y PELICULAS (CONTEXTO)
 
 CONCLUSIONES SOBRE RESULTADOS
 
+notas. 
+
+
+
 EFECTOS OBSERVADOS DE PARÁMETROS
 
-RETOS
+DIFERENCIAS ESPECÍFICAS SOBRE RECOMENDACIÓN DE VIDEOJUEGOS Y PELICULAS (CONTEXTO)
+Ver paper.
+Diferentes inherentes desde la recolección de los datos en Steam vs otras plataformas. QUE ES STEAM, plataforma que instalas y para jugar necesitas iniciar sesión, te monitorea toda tu actividad, etc.
+
+
+FUTURAS LINEAS DE INVESTIGACIÓN (RETOS PARA EL EQUIPO)
+En general el tamaño de datos, limitaciones de cómputo (más usuarios, más juegos, etc.)
+
+
+
+
+
+**PENDIENTES**
+
+CBP: INCORPORAR NOTAS DE MARIO Y AFINAR ESTILO Y REDACCIÓN
+
+MRR: INTRODUCCIÓN Y COMENTARIOS A SECCIÓN DE MODELO
+
+MHT: RESULTADOS
+
+TODOS: IDEAS PARA CONCLUSIONES
