@@ -146,6 +146,22 @@ ALS es la abreviatura de aternar mínimos cuadrados. Se refiere a un algoritmo d
 
 Cuando hablamos de recomendación implícita, es un algoritmo capaz de identificar artículos similares y hacer recomendaciones para los usuarios.
 
+
+## Evaluación
+
+La evaluación para modelos implícitos no es tan simple como en el caso explícito, pues no estamos modelando
+directamente los valores observados $r_{u,i}$.  
+
+Lo recomendable para cada usuario $i$, es generar un rango de los artículos de mayor a menor valor de $\hat{p}_{ui} = u_iv_j^t$ (juegos), y calcular
+
+$$
+\overline{rank} = \frac{\sum_{u,i} r_{ui}^t\;rank_{ui}}{\sum_{u,i}\;r_{ui}^t}
+$$
+Valores bajos de $\overline{rank}$ son más deseables, pues ellos indican que el orden de los juegos más utilizados están más cerca de la parte superior de la lista. 
+
+Podemos decir que $\overline{rank} \;=\;0$ para el mejor juego y $\overline{rank} \;=\;1$ para el peor. Los valores más bajos son obtenidos si los usuarios interactúan más con artículos que están encima en el ranking
+
+
 COMO SE CONSTRUYÓ EL SISTEMA DE RECOMENDACIÓN
 
 PREPROCESAMIENTO DE DATOS (DIVIDIR ENTRE 60, NUMÉRICOS, ETC.)
