@@ -9,6 +9,22 @@ library(tidyverse)
 
 dta <- read_rds('cache/data_clean.RDS')
 
+cat_apps_numeric <- dta %>% 
+  dplyr::distinct(app_name) %>% 
+  dplyr::arrange(app_name) %>% 
+  rowid_to_column("app_id")
+
+cat_apps_numeric %>% 
+  saveRDS('cache/cat_apps_numeric.rds')
+
+cat_users_numeric <- dta %>% 
+  dplyr::distinct(steamid) %>% 
+  dplyr::arrange(steamid) %>% 
+  rowid_to_column("steam_id")
+
+cat_users_numeric %>% 
+  saveRDS('cache/cat_users_numeric.rds')
+
 set.seed(987654321)
 
 usuarios_val <- dta %>% 
