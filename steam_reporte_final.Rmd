@@ -1,0 +1,150 @@
+---
+title: "Sistemas de Recomendación Implícita para videojuegos de plataforma Steam"
+author: 
+- Carlos Bautista
+- Mario Heredia
+- Miguel Reyes
+output:
+  html_document: default
+---
+
+
+# Examen final Métodos Analíticos. 
+
+### Maestría en Ciencia de Datos ITAM {.tabset .tabset-fade .tabset-pills}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+#Introducción
+
+#Trabajo previo (opcional)
+
+# Base de datos
+
+Los datos utilizados se obtuvieron de la base *Condensing Steam: Distilling the Diversity of Gamer Behavior*, que agrupa información de 108.7 millones de usuarios durante el periodo ***2008-2017*** de la plataforma de videojuegos Steam, con 716 millones de juegos y hasta 1.1 millones de años en horas jugadas.
+
+La base original está compuesta de 11 tablas de datos que contienen información diversa sobre los usuarios y sus atributos (id, juegos jugados, horas jugadas, información geográfica, información sobre sus "amigos", entre otros.), así como de los juegos y sus características (género, desarrollador, editor, etc.).
+
+Para el presente proyecto, se utilizó un subconjunto de "Condensing Steam" tomando los años ***2014-2017***, QUE SE CREÓ DE LA SIGUIENTE FORMA 
+
+
+(MH)
+
+
+
+El conjunto de datos resultante está compuesto de 7.2 millones de observaciones y 3 variables que son las que se utilizarán para construir el sistema de recomendación implícito:
+
+ - `steamid`: el identificador del usuario de la plataforma
+ - `app_name`: nombre del videojuego
+ - `playtime_forever`: minutos totales que el usuario ha utilizado el videojuego.
+ 
+Exploramos algunos datos de la tabla:
+
+```{r}
+cat_def <- read_rds('cache/cat_apps_def.rds')
+cat_limpio <- read_rds('cache/cat_apps_limpio.rds')
+dta_clean <- read_rds('cache/data_clean.rds')
+
+head(dta_clean)
+```
+
+En total se tienen **732,759*** usuarios diferentes que interactúan con 4,133 videojuegos.
+
+```{r}
+dim(dta_clean)
+length(unique(dta_clean$steamid))
+length(unique(dta_clean$app_name))
+
+```
+
+Respecto a las horas jugadas (playtime_forever), el resumen estadístico puede observarse a continuación:
+
+```{r}
+summary(dta_clean$playtime_forever)
+```
+
+## Split en entrenamiento y validación
+
+Los datos se dividen en un conjunto de entrenamiento que nos servirá para construir el modelo y otro de validación con el que evaluaremos las recomendaciones sugeridas.
+
+Para ello, se extraen de manera aleatoria 50% de los usuarios de la plataforma (`steamid`), y después se extraen de manera aleatoria el 50% de los videojuegos (`app_name`). Se genera un nuevo conjunto de datos con la intersección de ambos subconjuntos que corresponde al conjunto de validación, mientras que el conjunto de entrenamiento se forma con los datos restantes.
+
+De esta forma, los datos de validación corresponden al 25% del total de los datos, que equivalen a 5.42 millones de observaciones, y los de entrenamiento al 75%, con 1.78 millones de observaciones.
+
+```{r}
+dta_train <- read_rds('cache/dta_train.rds')
+dta_validation <- read_rds('cache/dta_validation.rds')
+
+dim(dta_train)
+dim(dta_validation)
+```
+
+Despúes de la separación, el conjunto de entrenamiento contiene 652,117 usuarios distintos y 4,115 videojuegos, mientras que el de validación tiene 270,827 usuarios y 2,038 videojuegos.
+
+```{r}
+length(unique(dta_train$steamid))
+length(unique(dta_train$app_name))
+
+length(unique(dta_validation$steamid))
+length(unique(dta_validation$app_name))
+```
+
+
+
+# Metodología
+
+Sistema de recomendación busca resolver el problema de "predecir la respuesta de personas a estímulos a los que no han sido expuestos, basados en respuesta a otros estímulos de esta y quizá otras personas similares". 
+
+El más común es el explícito, donde el usuario otorga una calificación al producto (típicamente en una escala del 1 a 5 estrellas), para lo cual se cuentan con modelos de recomendación y evaluación bien definidos a partir de dichas calificaciones explícitas.
+
+Los sistemas de recomendación implícitos se refieren a contextos donde no se tiene una calificación/evaluación del producto explícitamente definida por el usuario, pero se tienen variables de acciones del usuario que reflejan la preferencia o popularidad del producto y que, en muchos casos, resultan más informativos que la calificación directa del usuario.
+
+Nuestro sistema de recomendación se construye utilizando las horas jugadas por un usuario para cada videojuego.
+
+## Modelo (Miguel) -dentro de metodología-
+
+COMO SE CONSTRUYÓ EL SISTEMA DE RECOMENDACIÓN
+
+PREPROCESAMIENTO DE DATOS (DIVIDIR ENTRE 60, NUMÉRICOS, ETC.)
+
+NORMALIZACIÓN
+
+DEFINICIÓN DEL MODELO Y SUS PARÁMETROS, ALFA, LAMDA (REGULARIZACIÓN), ETC.
+
+AGRUPACIÓN DE ITEMS SIMILARES (LATENTES)
+
+PROMEDIOS PONDERADOS
+
+EVALUACIÓN - RANKING
+
+# Resultados
+
+SISTEMA DE RECOMENDACIÓN
+
+VALOR DE 0.28
+
+RECOMENDACIONES EXITOSAS DE ARTÍCULOS ESPECÍFICOS
+
+FALLOS COMUNES
+
+CONSIDERACIONES
+
+
+# Conclusiones
+
+VENTAJA DE SISTEMA DE RECOMENDACIÓN IMPLICITO
+
+DIFERENCIAS ESPECÍFICAS SOBRE RECOMENDACIÓN DE VIDEOJUEGOS Y PELICULAS (CONTEXTO)
+
+CONCLUSIONES SOBRE RESULTADOS
+
+EFECTOS OBSERVADOS DE PARÁMETROS
+
+RETOS
+
+
+
