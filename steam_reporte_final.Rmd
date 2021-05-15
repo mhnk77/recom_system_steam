@@ -15,13 +15,12 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
 library(tidyverse)
 ```
 
-#Introducción
+# Introducción
 
-#Trabajo previo (opcional)
+# Trabajo previo (opcional)
 
 # Base de datos
 
@@ -48,7 +47,6 @@ Exploramos algunos datos de la tabla:
 cat_def <- read_rds('cache/cat_apps_def.rds')
 cat_limpio <- read_rds('cache/cat_apps_limpio.rds')
 dta_clean <- read_rds('cache/data_clean.rds')
-
 head(dta_clean)
 ```
 
@@ -58,7 +56,6 @@ En total se tienen **732,759*** usuarios diferentes que interactúan con 4,133 v
 dim(dta_clean)
 length(unique(dta_clean$steamid))
 length(unique(dta_clean$app_name))
-
 ```
 
 Respecto a las horas jugadas (playtime_forever), el resumen estadístico puede observarse a continuación:
@@ -78,7 +75,6 @@ De esta forma, los datos de validación corresponden al 25% del total de los dat
 ```{r}
 dta_train <- read_rds('cache/dta_train.rds')
 dta_validation <- read_rds('cache/dta_validation.rds')
-
 dim(dta_train)
 dim(dta_validation)
 ```
@@ -88,7 +84,6 @@ Despúes de la separación, el conjunto de entrenamiento contiene 652,117 usuari
 ```{r}
 length(unique(dta_train$steamid))
 length(unique(dta_train$app_name))
-
 length(unique(dta_validation$steamid))
 length(unique(dta_validation$app_name))
 ```
@@ -105,7 +100,51 @@ Los sistemas de recomendación implícitos se refieren a contextos donde no se t
 
 Nuestro sistema de recomendación se construye utilizando las horas jugadas por un usuario para cada videojuego.
 
-## Modelo (Miguel) -dentro de metodología-
+## Modelo 
+
+Para este trabajo consideramos el índice $u,v$ para distinguir usuarios; los artículos están determinados por los subíndices $i,j$. De tal forma que podemos relacionar a los usuarios y los artículos mediante la relación $r_{u,i}$.  Esta relación representa la frecuencia de acciones sobre un artículo, por ejemplo, el número de compras en un sitio web, el número de veces que oprimimos la tecla "favoritos", clics que damos a un producto en especial o el tiempo para ver / escuchar video / audio. Es decir, es una medida implícita para el usuario $u$ y el artículo $i$. $r_{u,i}$lo entendemos, en el contexto de recomendación implícita, como las observaciones que se tienen. Hay que notar que en la recomendación explícita estos valores serían llamados los "ratings" otorgados a los artículos. Importante reiterar que aquí le llamamos observaciones.
+
+
+Para poner en contexto, $r_{u,i}$ puede indicar el número de ocasiones que el individuo $u$ adquiere el artículo $i$. O bien el tiempo que $u$ navega en el sitio web de $i$.En nuestro ejercicio, $r_{u,i}$ indica el tiempo que un individuo dedica a jugar un videojuego en específico.
+
+Para nuestro modelo, consideramos la variable binaria $p_{u,i}$ que nos indica la preferencia del usuario $u$ por un artículo $i$. 
+$$
+P_{u,i} =\left\{ \begin{array}{rcl}
+ 1\;\;si\;\;\;\; r_{u,i}\;>\; 0 \\ 0\;\;si\;\;\;\; r_{u,i}\;=\;0 
+\end{array}\right.
+$$
+$p_{u,i}\;=\;1$ nos indica que el usuario $u$ consume el artículo $i$, donde $r_{u,i} > 0$. Es decir, las observaciones entre el usuario y el artículo son positivas. 
+
+$p_{u,i}\;=\;0$ nos indica que el usuario $u$ no consume el bien $i$,donde $r_{u,i} = 0$. Es decir, no hay observaciones entre el usuario y el artículo. 
+
+En este sentido, si $p_{u,i}\;=\;0$, nos haría creer que el individuo $u$ no tiene preferencia por ese bien. Si sólo utilizamos $p_{u,i}$ se pensará que  el usuario actúa con un comportamiento binario. Si compra un producto, es porque le gusta el producto; de lo contrario, significa que al usuario no le gusta el producto. Hay que tener cuidado con esta  apreciación porque la realidad no es tan simple, la compra de un artículo por parte de un usuario no significa necesariamente que le guste al usuario, éste puede ser comprado como un regalo.
+
+
+Para corregir este sesgo binario, tenemos que considerar que nuestras creencias sobre las preferencias están asociadas con niveles de confianza muy variables, no son binarias. En primer lugar, por la naturaleza de los datos, cuando $p_{u,i}\;=\;0$ se asocia con una confianza baja, pero no  tomar ninguna acción positiva sobre un elemento puede deberse a muchas otras razones más allá de que no le guste. Aquí hay que tener en cuenta que el usuario puede desconocer la existencia de algún bien, en nuestro caso, de un videojuego. Incluso puede no consumirlo por el precio o disponibilidad.
+
+Los individuos tenemos distintos niveles de confianza entre los bienes que se consumen, incluso entre los elementos que son preferidos por el usuario. En general si $r_{u,i}$ crece, es un indicador que el usuario tiene mayor prefrencia por el artículo.
+
+Para saber qué tanto valor debemos darle a la preferencia, necesitamos modelar un nivel de confianza para mostrar que los usuarios prefieren un determinado producto. La confianza la medimos de la siguiente forma: 
+$$c_{ui} = 1+ \alpha r_{ui},$$
+Así obtenemos una confianza mínima en $p_{u,i}$
+
+$C_{u,i}$mide la confianza en la observación $p_{u,i}$.
+
+$\alpha$ es un regularizador constante de la tasa de incremento de la variable. Es un coeficiente de confianza que aumenta mientras observamos más evidencia del sesgo positivo.
+ 
+Asumimos que las preferencias son el producto punto de $p_{u,i}\;=\;x_u^Ty_i$. Estos vectores corresponden al usuario $u$ y al artículo $i$
+ 
+Estos dos vectores son referentes a los usuarios y los productos, lo que deseamos es compararlos directamente. Esta técnica es similar a la factorización de matrices que se realiza en recomendación explícita, pero con dos distinciones importantes: a) Necesitamos tomar en cuenta la variedad de los niveles de confianza; b) La optimización debe considerar todos los posibles pares de $u,i$, no solamente los observados. De acuerdo con esto, la función de pérdida que debe ser minimizada se ve de la siguiente forma: 
+$$ \min_{x*,y*}\sum_{u,i} C_{u,i}(p_{u,i}-x_u^Ty_i)^2 \;+\; \lambda(\sum_{u}\|x_u\|^2\;+\;\sum_{i}\|y_u\|^2)$$
+Donde $\lambda(\sum_{u}\|x_u\|^2\;+\;\sum_{i}\|y_u\|^2)$ es un parámetro de regularización y se hace una normalización para evitar el sobreajuste. $\lambda$ es uno de los parámetros que hay que ajustar.
+
+La función de pérdida que queremos minimizar contiene $m.n$ términos, donde $m$ es el número de usuarios y $n$ es el número de artículos. Esto implica que tenemos un número grande de términos que no podemos optimizar directamente con técnicas de optimización comunes como descenso en gradiente estocástico. Para optimizar utilizamos el algoritmo de Mínimos Cuadrados Alternados (ALS)
+
+## ALternating Least Squares (ALS)
+
+ALS es la abreviatura de aternar mínimos cuadrados. Se refiere a un algoritmo de recomendación que utiliza las calificaciones d todos los usuarios observados para inferir las preferencias de cada usuario y recomendar productos adecuados para el usuario.
+
+Cuando hablamos de recomendación implícita, es un algoritmo capaz de identificar artículos similares y hacer recomendaciones para los usuarios.
 
 COMO SE CONSTRUYÓ EL SISTEMA DE RECOMENDACIÓN
 
@@ -145,6 +184,3 @@ CONCLUSIONES SOBRE RESULTADOS
 EFECTOS OBSERVADOS DE PARÁMETROS
 
 RETOS
-
-
-
