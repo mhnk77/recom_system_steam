@@ -22,7 +22,7 @@ library(tidyverse)
 
 # Introducción
 
-Los sistemas de recomendación funcionan como filtros clasifican la información que recibirá el usuario en una plataforma. El objetivo es mejorar la experiencia del usuario  a través de sugerencias personalizadas basadas en la retroalimentación.
+Los sistemas de recomendación funcionan como filtros que clasifican la información que recibirá el usuario en una plataforma. Tienen como objetivo es mejorar la experiencia del usuario  a través de sugerencias personalizadas basadas en la retroalimentación. 
 
 Los sistemas de recomendación se clasifican de la siguiente manera. 
 
@@ -34,11 +34,17 @@ Los sistemas de recomendación se clasifican de la siguiente manera.
 
     * Retroalimentación implícita: Se obtiene de la actividad de los usuarios. Por ejemplo, historial de navegación, click en la descripción de un producto, el modo de búsqueda e incluso las acciones del mouse.
     
-La mayoría de la literatura se ocupa del filtrado colaborativo con retroalimentación explícita. Un problema de procesar los comentarios explícitos es  que la información no siempre está disponible. Los usuarios pueden ser renuentes a calificar productos o por las limitaciones del sistema que no pueden recopilar datos de comentarios explícitos. En un modelo de filtrado colaborativo con retroalimentación imolícita,una vez que el usuario aprueba que se recolecte información, no se necesitan datos adicionales del lado del cliente.
+Hay extensa literatura que se ocupa del filtrado colaborativo con retroalimentación explícita. La retroalimentación explícita enfrenta ciertos problemas, por ejemplo, procesar los comentarios explícitos en ocasiones es difícil porque  la información no siempre está disponible. Además, los usuarios pueden ser renuentes a calificar productos o bien, por las limitaciones del sistema que no pueden recopilar datos de comentarios explícitos. En un modelo de filtrado colaborativo con retroalimentación implícita,una vez que el usuario aprueba que se recolecte información, no se necesitan datos adicionales del lado del cliente.
 
-Este trabajo desarrolla un modelo de filtrado colaborativo con retroalimentación implícita, está inspirado en el artículo de [Collaborative FIltering for Implicit Feedback Datasets](http://yifanhu.net/PUB/cf.pdf) en el que desarrollan un algoritmo de sistema de recomendación de programas de televisión para el usuario final.
+Otra diferencia es que no hay retroalimentación negativa, como solamente se observa el comportamiento del usuario, solamente se observan los artículos que consume y no aquellos que le "desagradan". En retroalimentación explícita, los menos agradables tienen un rating menor. 
 
-El objetivo de este trabajo es realizar recomendaciones sobrevideojuegos, de acuerdo con su experiencia en la plataforma.
+En retroalimentación explícita el valor del rating indica preferencia, en implícita obtenemos confianza. Los valores de horas de videojuego por usuario nos describe la frecuencia de las acciones realizadas. En este caso, este dato nos otorga confianza en cada observación. Es muy probable que la recurrencia de un evento (horas jugadas) refleje la opinión del usuario.
+
+Este trabajo desarrolla un modelo de filtrado colaborativo con retroalimentación implícita, el cuál está inspirado en el artículo de [Collaborative FIltering for Implicit Feedback Datasets](http://yifanhu.net/PUB/cf.pdf) en el que desarrollan un algoritmo de sistema de recomendación de programas de televisión para el usuario final.
+
+El objetivo de este trabajo es realizar recomendaciones sobre videojuegos, de acuerdo con su experiencia en la plataforma. La recomendación toma como insumo el número de horas que los usuarios dedican a jugar algún videojuego en particular. 
+
+La estructura del trabajo es la siguiente: En la primera parte se hace una descripción de la base de datos utilizada y el procesamiento que se llevó a cabo para realizar un Split de entrenamiento y validación; la sección de Metodología explica el modelo de optimización para minimizar la función de pérdida por medio del algoritmo "Alternating Leas Suares (ALS)"; La evaluación explica la manera en que se genera un rango para obtener la recomendación; La sección de resultados muestra qué parámetros fueron otorgaron mejores resultados; por último, las conclusiones ofrecen recomendaciones sobre los resultados del modelo y aspectos a considerar del análisis.
 
 # Base de datos
 
@@ -113,7 +119,7 @@ length(unique(dta_validation$app_name))
 
 # Metodología
 
-Sistema de recomendación busca resolver el problema de "predecir la respuesta de personas a estímulos a los que no han sido expuestos, basados en respuesta a otros estímulos de esta y quizá otras personas similares". 
+Los sistemas de recomendación buscan resolver el problema de "predecir la respuesta de personas a estímulos a los que no han sido expuestos, basados en respuesta a otros estímulos de esta y quizá otras personas similares". 
 
 El más común es el explícito, donde el usuario otorga una calificación al producto (típicamente en una escala del 1 a 5 estrellas), para lo cual se cuentan con modelos de recomendación y métricas de evaluación (RMSE) bien definidas a partir de dichas calificaciones explícitas.
 
@@ -123,7 +129,7 @@ Nuestro sistema de recomendación se construye utilizando las horas jugadas por 
 
 ### Modelo 
 
-Para este trabajo consideramos el índice $u,v$ para distinguir usuarios; los artículos están determinados por los subíndices $i,j$. De tal forma que podemos relacionar a los usuarios y los artículos mediante la relación $r_{u,i}$.  Esta relación representa la frecuencia de acciones sobre un artículo, por ejemplo, el número de compras en un sitio web, el número de veces que oprimimos la tecla "favoritos", clics que damos a un producto en especial o el tiempo para ver / escuchar video / audio. Es decir, es una medida implícita para el usuario $u$ y el artículo $i$. $r_{u,i}$lo entendemos, en el contexto de recomendación implícita, como las observaciones que se tienen. Hay que notar que en la recomendación explícita estos valores serían llamados los "ratings" otorgados a los artículos. Importante reiterar que aquí le llamamos observaciones.
+Para este trabajo consideramos el índice $u,v$ para distinguir usuarios; los artículos están determinados por los subíndices $i,j$. De tal forma que podemos relacionar a los usuarios y los artículos mediante la relación $r_{u,i}$.  Esta relación representa la frecuencia de acciones sobre un artículo, por ejemplo, el número de compras en un sitio web, el número de veces que oprimimos la tecla "favoritos", clicks que damos a un producto en especial o el tiempo utilizamos para ver videos o escuchar música. La notación $r_{u,i}$ es una medida implícita para el usuario $u$ y el artículo $i$. En el contexto de recomendación implícita, $r_{u,i}$ son las observaciones que se tienen. Hay que notar que en la recomendación explícita estos valores serían llamados los "ratings" otorgados a los artículos. Aquí le llamamos observaciones.
 
 
 Para poner en contexto, $r_{u,i}$ puede indicar el número de ocasiones que el individuo $u$ adquiere el artículo $i$. O bien el tiempo que $u$ navega en el sitio web de $i$.En nuestro ejercicio, $r_{u,i}$ indica el tiempo que un individuo dedica a jugar un videojuego en específico.
@@ -141,12 +147,12 @@ $p_{u,i}\;=\;0$ nos indica que el usuario $u$ no consume el bien $i$,donde $r_{u
 En este sentido, si $p_{u,i}\;=\;0$, nos haría creer que el individuo $u$ no tiene preferencia por ese bien. Si sólo utilizamos $p_{u,i}$ se pensará que  el usuario actúa con un comportamiento binario. Si compra un producto, es porque le gusta el producto; de lo contrario, significa que al usuario no le gusta el producto. Hay que tener cuidado con esta  apreciación porque la realidad no es tan simple, la compra de un artículo por parte de un usuario no significa necesariamente que le guste al usuario, éste puede ser comprado como un regalo.
 
 
-Para corregir este sesgo binario, tenemos que considerar que nuestras creencias sobre las preferencias están asociadas con niveles de confianza muy variables, no son binarias. En primer lugar, por la naturaleza de los datos, cuando $p_{u,i}\;=\;0$ se asocia con una confianza baja, pero no  tomar ninguna acción positiva sobre un elemento puede deberse a muchas otras razones más allá de que no le guste. Aquí hay que tener en cuenta que el usuario puede desconocer la existencia de algún bien, en nuestro caso, de un videojuego. Incluso puede no consumirlo por el precio o disponibilidad.
+Para corregir este sesgo binario, tenemos que considerar que nuestras creencias sobre las preferencias están asociadas con niveles de confianza muy variables, es decir, no son binarias. En primer lugar, por la naturaleza de los datos, cuando $p_{u,i}\;=\;0$ se asocia con una confianza baja, pero no  tomar ninguna acción sobre un elemento puede deberse a muchas otras razones más allá de que no le guste. Hay que tener en cuenta que el usuario puede desconocer la existencia de algún bien, en nuestro caso, de un videojuego. Incluso puede no consumirlo por el precio o disponibilidad.
 
-Los individuos tenemos distintos niveles de confianza entre los bienes que se consumen, incluso entre los elementos que son preferidos por el usuario. En general si $r_{u,i}$ crece, es un indicador que el usuario tiene mayor prefrencia por el artículo.
+Para los individuos tenemos distintos niveles de confianza entre los bienes que se consumen, incluso entre los elementos que son preferidos por el usuario. En general si $r_{u,i}$ crece, es un indicador que el usuario tiene mayor prefrencia por el artículo.
 
-Para saber qué tanto valor debemos darle a la preferencia, necesitamos modelar un nivel de confianza para mostrar que los usuarios prefieren un determinado producto. La confianza la medimos de la siguiente forma: 
-$$c_{ui} = 1+ \alpha r_{ui},$$
+Para saber qué tanto valor debemos darle a la preferencia, necesitamos modelar un nivel de confianza del usuario por algún producto. La confianza la medimos de la siguiente forma: 
+$$C_{ui} = 1+ \alpha r_{ui}$$
 Así obtenemos una confianza mínima en $p_{u,i}$
 
 $C_{u,i}$mide la confianza en la observación $p_{u,i}$.
@@ -155,7 +161,7 @@ $\alpha$ es un parámetro constante de la tasa de incremento de la variable. Es 
  
 Asumimos que las preferencias son el producto punto de $p_{u,i}\;=\;x_u^Ty_i$. Estos vectores corresponden al usuario $u$ y al artículo $i$
  
-Estos dos vectores son referentes a los usuarios y los productos, lo que deseamos es compararlos directamente. Esta técnica es similar a la factorización de matrices que se realiza en recomendación explícita, pero con dos distinciones importantes: a) Necesitamos tomar en cuenta la variedad de los niveles de confianza; b) La optimización debe considerar todos los posibles pares de $u,i$, no solamente los observados. De acuerdo con esto, la función de pérdida que debe ser minimizada se ve de la siguiente forma: 
+Estos dos vectores son referentes a los usuarios y los productos. Deseamos compararlos directamente. Esta técnica es similar a la factorización de matrices que se realiza en recomendación explícita, pero con dos distinciones importantes: a) Necesitamos tomar en cuenta la variedad de los niveles de confianza $(C_{u,i})$; b) La optimización debe considerar todos los posibles pares de $u,i$, no solamente los observados. De acuerdo con esto, la función de pérdida que debe ser minimizada se ve de la siguiente forma: 
 $$ \min_{x*,y*}\sum_{u,i} C_{u,i}(p_{u,i}-x_u^Ty_i)^2 \;+\; \lambda(\sum_{u}\|x_u\|^2\;+\;\sum_{i}\|y_u\|^2)$$
 Donde $\lambda(\sum_{u}\|x_u\|^2\;+\;\sum_{i}\|y_u\|^2)$ es un parámetro de regularización y se hace una normalización para evitar el sobreajuste. $\lambda$ es uno de los parámetros que hay que ajustar.
 
@@ -175,25 +181,22 @@ directamente los valores observados $r_{u,i}$.
 Lo recomendable para cada usuario $i$, es generar un rango de los artículos de mayor a menor valor de $\hat{p}_{ui} = u_iv_j^t$ (juegos), y calcular
 
 $$
-\overline{rank} = \frac{\sum_{u,i} r_{ui}^t\;rank_{ui}}{\sum_{u,i}\;r_{ui}^t}
+\overline{rank} = \frac{\sum_{u,i} r_{ui}^t\;pctil_{ui}}{\sum_{u,i}\;r_{ui}^t}
 $$
 
 que se refiere al rango de la matriz de factores latentes. Valores bajos de $\overline{rank}$ son más deseables, pues ellos indican que el orden de los juegos más utilizados están más cerca de la parte superior de la lista. 
 
 Podemos decir que $\overline{rank} \;=\;0$ para el mejor juego y $\overline{rank} \;=\;1$ para el peor. Los valores más bajos son obtenidos si los usuarios interactúan más con artículos que están encima en el ranking.
 
-***NOTA. cambiar lado derecho de la ecuación a percentil u,i en lugar de rank u,i y explicar.***
+En la ecuación, $pctil$ se refiera al percentil del artículo $i$ en la lista ordenada de artículos.
+
 
 Es importante mencionar que para construir el sistema de recomendación, la variable `appid` se convirtió de minutos a horas de juego, debido que al reducir la variación en la escala se lograron mejores resultados en la ***predicción y evaluación***.
 
 
-
-Consideraciones sobre evaluación
-
-
 # Resultados
 
-SISTEMA DE RECOMENDACIÓN
+### Sistema de recomendación
 
 Se utiliza la función `SparkR::predict()` para obtener las predicciones del nivel de gusto en el conjunto de prueba.
 
@@ -201,7 +204,7 @@ Adicional a esto, para cada usuario se toma una muestra aleatoria de $n = 40$ de
 
 De esta manera, para cada usuario se calculan las predicciones del nivel de preferencia de los 40 juegos aleatorios que le fueron asignados, además de los juegos para los cuales se tiene información sobre el tiempo de juego.
 
-Como se explica en las notas y en el paper, se calcula una métrica de evaluación llamada `rank`, la cual consiste en rankear los niveles de preferencia de todos los juegos, por usuario. Posteriormente, se calcula el percentil de cada observación, por usuario, de manera que los juegos con mayor preferencia predicha tienen un percentil más bajo, y vice versa. De esta manera, mientras mejor sea la predicción, menor será el valor de `rank`
+Como se explica en las notas y en el artículo de referencia, se calcula una métrica de evaluación llamada `rank`, la cual consiste en rankear los niveles de preferencia de todos los juegos, por usuario. Posteriormente, se calcula el percentil de cada observación, por usuario, de manera que los juegos con mayor preferencia predicha tienen un percentil más bajo, y vice versa. De esta manera, mientras mejor sea la predicción, menor será el valor de `rank`
 
 Después, únicamente para los juegos que pertenecen al conjunto de prueba, se multiplica el número de horas jugadas por el percentil al cual corresponden. Y al final se divide entre el número total de horas jugadas.
 La idea intuitiva, es que, mientras más acierte el modelo en rankear correctamente los niveles de preferencia, más veces se multiplicarán por valores bajos de percentiles, obteniendo así mejores valores de "rank".
@@ -212,12 +215,17 @@ Se corrieron XX configuraciones de modelos (y tabla)
 
 El mejor modelo: 
 
-- La mejor configuración fue lamda 150, rank 80, y alpha 1.
+Los parámetros que mejor funcionaron son los siguientes:
 
-- Lamda es el que más afecta los resultados. el rank si afecta pero no mucho. El valor de alpha fue el mejor 1 (default).
+| Parámetro | $\lambda$ |$\overline{rank}$|$\alpha$|
+|-----------|---------- |-----------------|--------|
+| Valor     |    150    |       80        |    1   |
 
 
-- Gráfica rank vs count (cero donde mejor lo hace), por lo tanto esperaríamos mayor densidad en valores cercanos a cero.
+- EL parámetro Lambda $\lambda$ es el que más afecta los resultados. el $\overline{rank}$ si afecta pero no mucho. El valor de $\alpha$ fue el mejor 1 (default).
+
+
+- Gráfica $\overline{rank}$ vs count (cero donde mejor lo hace), por lo tanto esperaríamos mayor densidad en valores cercanos a cero.
 
 - Para un usuario particular (id = 15), el que más jugó le dio una recomendación alta. Otros ejemplos donde usuario jugó poquito y le dio
 
@@ -229,28 +237,22 @@ ejemplo de FALLOS (tablas)
 
 
 # Conclusiones
-
-VENTAJA DE SISTEMA DE RECOMENDACIÓN IMPLICITO. puede ser más informativo
+Rankear los niveles de preferencia de los videojuegos para calcular percentiles permite obtener una evaluación consistente de las preferencias de los usuarios. 
 
 
 CONCLUSIONES SOBRE RESULTADOS
-
 notas. 
-
-
 
 EFECTOS OBSERVADOS DE PARÁMETROS
 
 DIFERENCIAS ESPECÍFICAS SOBRE RECOMENDACIÓN DE VIDEOJUEGOS Y PELICULAS (CONTEXTO)
 Ver paper.
-Diferentes inherentes desde la recolección de los datos en Steam vs otras plataformas. QUE ES STEAM, plataforma que instalas y para jugar necesitas iniciar sesión, te monitorea toda tu actividad, etc.
+
+Hay diferencias inherentes desde la recolección de los datos en Steam vs otras plataformas. Steam es una plataforma de distribución digital que te permite descargar jeugos. Para poder utilizar el servicio es necesario estar registrado mediante la creación de una cuenta gratuita a la que se vinculan los juegos comprados por el jugador. Estos juegos pueden ser tanto los juegos que se ofrecen enla plataforma, como ciertos juegos comprados en tiendas físicas. Para poder jugar, después de la instalación e iniciar sesión, la plataforma monitorea toda tu actividad. Aunque en steam es posible comprar un juego y regalarlo, eso no quita validez a la investigación, porque la variable que se mide son las horas jugadas por videojuego, no los juegos comprados.
 
 
 FUTURAS LINEAS DE INVESTIGACIÓN (RETOS PARA EL EQUIPO)
 En general el tamaño de datos, limitaciones de cómputo (más usuarios, más juegos, etc.)
-
-
-
 
 
 **PENDIENTES**
