@@ -20,9 +20,7 @@ library(tidyverse)
 
 # Introducción
 
-<<<<<<< Updated upstream
 Los sistemas de recomendación funcionan como filtros clasifican la información que recibirá el usuario en una plataforma. El objetivo es mejorar la experiencia del usuario  a través de sugerencias personalizadas basadas en la retroalimentación.
-
 
 Los sistemas de recomendación se clasifican de la siguiente manera. 
 
@@ -39,11 +37,6 @@ La mayoría de la literatura se ocupa del filtrado colaborativo con retroaliment
 Este trabajo desarrolla un modelo de filtrado colaborativo con retroalimentación implícita, está inspirado en el artículo de [Collaborative FIltering for Implicit Feedback Datasets](http://yifanhu.net/PUB/cf.pdf) en el que desarrollan un algoritmo de sistema de recomendación de programas de televisión para el usuario final.
 
 El objetivo de este trabajo es realizar recomendaciones sobrevideojuegos, de acuerdo con su experiencia en la plataforma.
-
-
-=======
->>>>>>> Stashed changes
-
 
 # Base de datos
 
@@ -170,11 +163,7 @@ La función de pérdida que queremos minimizar contiene $m.n$ términos, donde $
 
 El sistema de recomendación implícita, se crea por medio del algoritmo ALS, con base en *Collaborative Filtering for Implicit Feedback Datasets* (Hu, Koren and Volinsky 2008). Es un algoritmo de recomendación capaz de identificar artículos similares y hacer recomendaciones para los usuarios.
 
-<<<<<<< Updated upstream
-La implementación del algoritmo está hecha en [spark](https://www.rdocumentation.org/packages/sparklyr/versions/1.1.0/topics/ml_als)
-=======
-Para su implementación, se utiliza la función `spark.als()` del paquete `SparkR`, utilizando el argumento `implicit = TRUE`, para asegurarse de utilizar el algoritmo adecuado para calificaciones implícitas.
->>>>>>> Stashed changes
+La implementación del algoritmo está hecha en [spark](https://www.rdocumentation.org/packages/sparklyr/versions/1.1.0/topics/ml_als), a través de la función `spark.als()` del paquete `SparkR`, utilizando el argumento `implicit = TRUE`, para asegurarse de utilizar el algoritmo adecuado para calificaciones implícitas.
 
 ## Evaluación
 
