@@ -20,6 +20,7 @@ library(tidyverse)
 
 # Introducción
 
+<<<<<<< Updated upstream
 Los sistemas de recomendación funcionan como filtros clasifican la información que recibirá el usuario en una plataforma. El objetivo es mejorar la experiencia del usuario  a través de sugerencias personalizadas basadas en la retroalimentación.
 
 
@@ -40,20 +41,21 @@ Este trabajo desarrolla un modelo de filtrado colaborativo con retroalimentació
 El objetivo de este trabajo es realizar recomendaciones sobrevideojuegos, de acuerdo con su experiencia en la plataforma.
 
 
+=======
+>>>>>>> Stashed changes
 
 
 # Base de datos
 
 Los datos utilizados se obtuvieron de la base *Condensing Steam: Distilling the Diversity of Gamer Behavior*, que agrupa información histórica de 108.7 millones de usuarios recolectados en 2014 de la plataforma de videojuegos Steam, con 716 millones de juegos y hasta 1.1 millones de años en horas jugadas.
 
-La base original está compuesta de 11 tablas de datos que contienen información diversa sobre los usuarios y sus atributos (id, juegos jugados, horas jugadas, información geográfica, información sobre sus "amigos", entre otros.), así como de los juegos y sus características (género, desarrollador, editor, etc.).
+La base original está compuesta de 11 tablas de datos que contienen información diversa sobre los usuarios y sus atributos (id, juegos jugados, horas jugadas, información geográfica, información sobre sus "amigos", entre otros.), así como de los juegos y sus características (género, desarrollador, editor, etc.). Tiene un peso de 17.5GB comprimida, y 160GB al descomprimirse, y está en formato *.sql*. Para utilizarla, fue necesario restaurarla utilizando el sistema manejador de bases de datos *MariaDB*, el cual opera basado en *MySQL*.
 
-Para el presente proyecto, se utilizó un subconjunto de "Condensing Steam" tomando de manera aleatoria 800 mil usuarios contenidos en la base, QUE SE CREÓ DE LA SIGUIENTE FORMA 
+Para el presente proyecto, se utilizó un subconjunto de *Condensing Steam* tomando de manera aleatoria 800 mil usuarios contenidos en la base. Se utilizan las tablas `Games_1` y `Games_2`, que contienen información sobre el id del jugador, id del juego o app, y el número de minutos jugados.
 
+El diccionario que contiene la relación entre el id del videojuego y su nombre fue obtenida de https://github.com/dgibbs64/SteamCMD-AppID-List, y completada manualmente con ayuda de la herramienta web https://steamdb.info/.
 
-(MH)
-
-
+Se identificó que existen algunos videojuegos con el mismo nombre, pero con diferente id, por lo cual se reindexó dicho catálogo, utilizando nombres de videojuegos únicos, y sumando el número de minutos de todos los jugadores, en caso de que tuvieran tiempo de juego en un app que tuviera dos ids.
 
 El conjunto de datos resultante está compuesto de 7.2 millones de observaciones y 3 variables que son las que se utilizarán para construir el sistema de recomendación implícito:
 
@@ -88,9 +90,13 @@ summary(dta_clean$playtime_forever)
 
 Los datos se dividen en un conjunto de entrenamiento que nos servirá para construir el modelo y otro de validación con el que evaluaremos las recomendaciones sugeridas.
 
-Para ello, se extraen de manera aleatoria 50% de los usuarios de la plataforma (`steamid`), y después se extraen de manera aleatoria el 50% de los videojuegos (`app_name`). Se genera un nuevo conjunto de datos con la intersección de ambos subconjuntos que corresponde al conjunto de validación, mientras que el conjunto de entrenamiento se forma con los datos restantes.
 
-De esta forma, los datos de validación corresponden al 25% del total de los datos, que equivalen a 1.78 millones de observaciones, y los de entrenamiento al 75%, con 5.42 millones de observaciones.
+
+El set de validación se construye tomando los registros que pertenecen a la intersección de ambos conjuntos definidos anteriormente. Al ser la intersección, el porcentaje de la base conservado es aprox $ .5 *.5 = .25 = 25\% $.
+
+El set de entrenamiento, entonces, se compone por todos los registros que NO pertenecen al set de validación.
+
+Para ello, se extraen de manera aleatoria 50% de los usuarios de la plataforma (`steamid`), y después se extraen de manera aleatoria el 50% de los videojuegos (`app_name`). El set de validación se construye tomando los registros que pertenecen a la intersección de ambos conjuntos definidos anteriormente. Al ser la intersección, el porcentaje de la base conservado es aprox $ .5 *.5 = .25 = 25\% $, equivalente a 1.78 millones de observaciones. El set de entrenamiento, entonces, se compone por todos los registros restantes que no pertenecen al set de validación y equivalen a 5.42 millones de observaciones.
 
 ```{r}
 dta_train <- read_rds('cache/dta_train.rds')
@@ -162,11 +168,13 @@ La función de pérdida que queremos minimizar contiene $m.n$ términos, donde $
 
 ## Alternating Least Squares (ALS)
 
-ALS es la abreviatura de alternar mínimos cuadrados. Se refiere a un algoritmo de recomendación que utiliza las calificaciones de todos los usuarios observados para inferir las preferencias de cada usuario y recomendar productos adecuados para el usuario.
+El sistema de recomendación implícita, se crea por medio del algoritmo ALS, con base en *Collaborative Filtering for Implicit Feedback Datasets* (Hu, Koren and Volinsky 2008). Es un algoritmo de recomendación capaz de identificar artículos similares y hacer recomendaciones para los usuarios.
 
-Cuando hablamos de recomendación implícita, es un algoritmo capaz de identificar artículos similares y hacer recomendaciones para los usuarios.
-
+<<<<<<< Updated upstream
 La implementación del algoritmo está hecha en [spark](https://www.rdocumentation.org/packages/sparklyr/versions/1.1.0/topics/ml_als)
+=======
+Para su implementación, se utiliza la función `spark.als()` del paquete `SparkR`, utilizando el argumento `implicit = TRUE`, para asegurarse de utilizar el algoritmo adecuado para calificaciones implícitas.
+>>>>>>> Stashed changes
 
 ## Evaluación
 
@@ -178,15 +186,16 @@ Lo recomendable para cada usuario $i$, es generar un rango de los artículos de 
 $$
 \overline{rank} = \frac{\sum_{u,i} r_{ui}^t\;rank_{ui}}{\sum_{u,i}\;r_{ui}^t}
 $$
-Valores bajos de $\overline{rank}$ son más deseables, pues ellos indican que el orden de los juegos más utilizados están más cerca de la parte superior de la lista. 
+
+que se refiere al rango de la matriz de factores latentes. Valores bajos de $\overline{rank}$ son más deseables, pues ellos indican que el orden de los juegos más utilizados están más cerca de la parte superior de la lista. 
 
 Podemos decir que $\overline{rank} \;=\;0$ para el mejor juego y $\overline{rank} \;=\;1$ para el peor. Los valores más bajos son obtenidos si los usuarios interactúan más con artículos que están encima en el ranking.
 
-NOTA. cambiar lado derecho de la ecuación a percentil u,i en lugar de rank u,i y explicar.
+***NOTA. cambiar lado derecho de la ecuación a percentil u,i en lugar de rank u,i y explicar.***
 
-PREPROCESAMIENTO DE DATOS (DIVIDIR ENTRE 60, NUMÉRICOS, ETC.)
+Es importante mencionar que para construir el sistema de recomendación, la variable `appid` se convirtió de minutos a horas de juego, debido que al reducir la variación en la escala se lograron mejores resultados en la ***predicción y evaluación***.
 
-NORMALIZACIÓN. SE REENUMERARON LOS IDS DE USUARIOS Y JUEGOS, PARA UTILIZAR EN SPARK.
+
 
 Consideraciones sobre evaluación
 
@@ -195,13 +204,27 @@ Consideraciones sobre evaluación
 
 SISTEMA DE RECOMENDACIÓN
 
+Se utiliza la función `SparkR::predict()` para obtener las predicciones del nivel de gusto en el conjunto de prueba.
+
+Adicional a esto, para cada usuario se toma una muestra aleatoria de $n = 40$ del conjunto de los 250 juegos o apps más populares, según el número total de horas de juego, del conjunto de entrenamiento.
+
+De esta manera, para cada usuario se calculan las predicciones del nivel de preferencia de los 40 juegos aleatorios que le fueron asignados, además de los juegos para los cuales se tiene información sobre el tiempo de juego.
+
+Como se explica en las notas y en el paper, se calcula una métrica de evaluación llamada `rank`, la cual consiste en rankear los niveles de preferencia de todos los juegos, por usuario. Posteriormente, se calcula el percentil de cada observación, por usuario, de manera que los juegos con mayor preferencia predicha tienen un percentil más bajo, y vice versa. De esta manera, mientras mejor sea la predicción, menor será el valor de `rank`
+
+Después, únicamente para los juegos que pertenecen al conjunto de prueba, se multiplica el número de horas jugadas por el percentil al cual corresponden. Y al final se divide entre el número total de horas jugadas.
+La idea intuitiva, es que, mientras más acierte el modelo en rankear correctamente los niveles de preferencia, más veces se multiplicarán por valores bajos de percentiles, obteniendo así mejores valores de "rank".
+
+Se conserva el modelo con mejor valor para la métrica de ajuste.
+
 Se corrieron XX configuraciones de modelos (y tabla)
 
 El mejor modelo: 
 
+- La mejor configuración fue lamda 150, rank 80, y alpha 1.
+
 - Lamda es el que más afecta los resultados. el rank si afecta pero no mucho. El valor de alpha fue el mejor 1 (default).
 
-- La mejor configuración fue lamda 150, rank 80, y alpha 1.
 
 - Gráfica rank vs count (cero donde mejor lo hace), por lo tanto esperaríamos mayor densidad en valores cercanos a cero.
 

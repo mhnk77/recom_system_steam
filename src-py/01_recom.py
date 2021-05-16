@@ -19,7 +19,7 @@ from sklearn.preprocessing import MinMaxScaler
 import implicit # The Cython library
 
 # Load the data like we did before
-raw_data = pyreadr.read_r('cache/training.Rds')
+raw_data = pyreadr.read_r('cache/dta_train.Rds')
 
 print(raw_data.keys()) # let's check what objects we got: there is only None
 data = raw_data[None] # extract the pandas data frame for the only object available
@@ -63,64 +63,35 @@ model.fit(data_conf)
 item_id = 147068 #Jay-Z
 n_similar = 10
 
-# Get the user and item vectors from our trained model
-user_vecs = model.user_factors
-item_vecs = model.item_factors
-
-# Calculate the vector norms
-item_norms = np.sqrt((item_vecs * item_vecs).sum(axis=1))
-
-# Calculate the similarity score, grab the top N items and
-# create a list of item-score tuples of most similar artists
-scores = item_vecs.dot(item_vecs[item_id]) / item_norms
-top_idx = np.argpartition(scores, -n_similar)[-n_similar:]
-similar = sorted(zip(top_idx, scores[top_idx] / item_norms[item_id]), key=lambda x: -x[1])
+# Use implicit to get similar items.
+similar = model.similar_items(item_id, n_similar)
 
 # Print the names of our most similar artists
 for item in similar:
     idx, score = item
     print data.artist.loc[data.artist_id == idx].iloc[0]
 
-
+    
 #------------------------------
 # CREATE USER RECOMMENDATIONS
 #------------------------------
 
-def recommend(user_id, sparse_user_item, user_vecs, item_vecs, num_items=10):
-    """The same recommendation function we used before"""
-
-    user_interactions = sparse_user_item[user_id,:].toarray()
-
-    user_interactions = user_interactions.reshape(-1) + 1
-    user_interactions[user_interactions > 1] = 0
-
-    rec_vector = user_vecs[user_id,:].dot(item_vecs.T).toarray()
-
-    min_max = MinMaxScaler()
-    rec_vector_scaled = min_max.fit_transform(rec_vector.reshape(-1,1))[:,0]
-    recommend_vector = user_interactions * rec_vector_scaled
-
-    item_idx = np.argsort(recommend_vector)[::-1][:num_items]
-
-    artists = []
-    scores = []
-
-    for idx in item_idx:
-        artists.append(data.artist.loc[data.artist_id == idx].iloc[0])
-        scores.append(recommend_vector[idx])
-
-    recommendations = pd.DataFrame({'artist': artists, 'score': scores})
-
-    return recommendations
-
-# Get the trained user and item vectors. We convert them to 
-# csr matrices to work with our previous recommend function.
-user_vecs = sparse.csr_matrix(model.user_factors)
-item_vecs = sparse.csr_matrix(model.item_factors)
-
 # Create recommendations for user with id 2025
 user_id = 2025
 
-recommendations = recommend(user_id, sparse_user_item, user_vecs, item_vecs)
+# Use the implicit recommender.
+recommended = model.recommend(user_id, sparse_user_item)
+
+artists = []
+scores = []
+
+# Get artist names from ids
+for item in recommended:
+    idx, score = item
+    artists.append(data.artist.loc[data.artist_id == idx].iloc[0])
+    scores.append(score)
+
+# Create a dataframe of artist names and scores
+recommendations = pd.DataFrame({'artist': artists, 'score': scores})
 
 print recommendations
