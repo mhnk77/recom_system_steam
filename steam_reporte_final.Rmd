@@ -20,7 +20,25 @@ library(tidyverse)
 
 # Introducción
 
-# Trabajo previo (opcional)
+Los sistemas de recomendación funcionan como filtros clasifican la información que recibirá el usuario en una plataforma. El objetivo es mejorar la experiencia del usuario  a través de sugerencias personalizadas basadas en la retroalimentación.
+
+
+Los sistemas de recomendación se clasifican de la siguiente manera. 
+
+ 1. Basados en contenido: Tomando en cuenta algunos datos del historial del usuario intenta  predecir qué busca el usuario y que sugerencias similares puede  mostrar. 
+ 
+ 2. Filtrado colaborativo: Recomienda nuevos productos según las interacciones de los usuarios y/o las calificaciones de varios productos. La recomendación se basa en usuarios que han hecho valoraciones semejantes o bien, encontrando la similitud entre artículos dada por el gusto de los usuarios. El filtrado colaborativo se alimenta de dos tipos de datos
+ 
+    * Retroalimentación explícita: Se obtiene de evaluaciones claras dadas por los usuarios de los productos que les han interesado. Por ejemplo, los datos de clasificación de estrellas recopilados de las clasificaciones de películas de los usuarios. dados por los usuarios (por ejemplo, Netflix mucho tiempo fue así: $1-5$ estrellas). 
+
+    * Retroalimentación implícita: Se obtiene de la actividad de los usuarios. Por ejemplo, historial de navegación, click en la descripción de un producto, el modo de búsqueda e incluso las acciones del mouse.
+    
+La mayoría de la literatura se ocupa del filtrado colaborativo con retroalimentación explícita. Un problema de procesar los comentarios explícitos es  que la información no siempre está disponible. Los usuarios pueden ser renuentes a calificar productos o por las limitaciones del sistema que no pueden recopilar datos de comentarios explícitos. En un modelo de filtrado colaborativo con retroalimentación imolícita,una vez que el usuario aprueba que se recolecte información, no se necesitan datos adicionales del lado del cliente.
+
+Este trabajo desarrolla un modelo de filtrado colaborativo con retroalimentación implícita, está inspirado en el artículo de [Collaborative FIltering for Implicit Feedback Datasets](http://yifanhu.net/PUB/cf.pdf) en el que desarrollan un algoritmo de sistema de recomendación de programas de televisión para el usuario final.
+
+El objetivo de este trabajo es realizar recomendaciones sobrevideojuegos, de acuerdo con su experiencia en la plataforma.
+
 
 
 
@@ -148,6 +166,7 @@ ALS es la abreviatura de alternar mínimos cuadrados. Se refiere a un algoritmo 
 
 Cuando hablamos de recomendación implícita, es un algoritmo capaz de identificar artículos similares y hacer recomendaciones para los usuarios.
 
+La implementación del algoritmo está hecha en [spark](https://www.rdocumentation.org/packages/sparklyr/versions/1.1.0/topics/ml_als)
 
 ## Evaluación
 
