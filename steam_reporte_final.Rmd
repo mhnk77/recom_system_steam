@@ -1,12 +1,11 @@
 ---
 title: "Sistemas de Recomendación Implícita para videojuegos de plataforma Steam"
-
-
-author: 
+author:
 - Carlos Bautista
 - Mario Heredia
 - Miguel Reyes
 output:
+  pdf_document: default
   html_document: default
 ---
 
