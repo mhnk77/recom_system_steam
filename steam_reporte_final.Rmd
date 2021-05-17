@@ -25,21 +25,21 @@ library(readxl)
 
 # Introducción
 
-Los sistemas de recomendación funcionan como filtros que clasifican la información que recibirá el usuario en una plataforma. Tienen como objetivo es mejorar la experiencia del usuario  a través de sugerencias personalizadas basadas en la retroalimentación. 
+Los sistemas de recomendación funcionan como filtros que clasifican la información que recibirá el usuario en una plataforma. Tienen como objetivo mejorar la experiencia del usuario  a través de sugerencias personalizadas basadas en la retroalimentación. 
 
 Los sistemas de recomendación se clasifican de la siguiente manera. 
 
- 1. Basados en contenido: Tomando en cuenta algunos datos del historial del usuario intenta  predecir qué busca el usuario y que sugerencias similares puede  mostrar. 
+ 1. Basados en contenido: Tomando en cuenta algunos datos del historial del usuario intentan  predecir qué busca el usuario y que sugerencias similares puede  mostrar. 
  
- 2. Filtrado colaborativo: Recomienda nuevos productos según las interacciones de los usuarios y/o las calificaciones de varios productos. La recomendación se basa en usuarios que han hecho valoraciones semejantes o bien, encontrando la similitud entre artículos dada por el gusto de los usuarios. El filtrado colaborativo se alimenta de dos tipos de datos
+ 2. Filtrado colaborativo: Recomienda nuevos productos según las interacciones de los usuarios y/o las calificaciones de varios productos. La recomendación se basa en usuarios que han hecho valoraciones semejantes o bien, encontrando la similitud entre artículos dada por el gusto de los usuarios. El filtrado colaborativo se alimenta de dos tipos de datos.
  
-    * Retroalimentación explícita: Se obtiene de evaluaciones claras dadas por los usuarios de los productos que les han interesado. Por ejemplo, los datos de clasificación de estrellas recopilados de las clasificaciones de películas de los usuarios. dados por los usuarios (por ejemplo, Netflix mucho tiempo fue así: $1-5$ estrellas). 
+    * Retroalimentación explícita: Se obtiene de evaluaciones claras dadas por los usuarios de los productos que les han interesado. Por ejemplo, los datos de clasificación de estrellas recopilados de las clasificaciones de películas. Por ejemplo, Netflix mucho tiempo fue así: $1-5$ estrellas. En concreto, la retroalimentación la da el usuario. 
 
     * Retroalimentación implícita: Se obtiene de la actividad de los usuarios. Por ejemplo, historial de navegación, click en la descripción de un producto, el modo de búsqueda e incluso las acciones del mouse.
     
-Hay extensa literatura que se ocupa del filtrado colaborativo con retroalimentación explícita. La retroalimentación explícita enfrenta ciertos problemas, por ejemplo, procesar los comentarios explícitos en ocasiones es difícil porque  la información no siempre está disponible. Además, los usuarios pueden ser renuentes a calificar productos o bien, por las limitaciones del sistema que no pueden recopilar datos de comentarios explícitos. En un modelo de filtrado colaborativo con retroalimentación implícita,una vez que el usuario aprueba que se recolecte información, no se necesitan datos adicionales del lado del cliente.
+Hay extensa literatura que se ocupa del filtrado colaborativo con retroalimentación explícita. La retroalimentación explícita enfrenta ciertos problemas, por ejemplo, procesar los comentarios explícitos en ocasiones es difícil porque  la información no siempre está disponible. Además, los usuarios pueden ser renuentes a calificar productos, incluso por las limitaciones del sistema que no pueden recopilar datos de comentarios explícitos. En un modelo de filtrado colaborativo con retroalimentación implícita,una vez que el usuario aprueba que se recolecte información, no se necesitan datos adicionales del lado del cliente.
 
-Otra diferencia es que no hay retroalimentación negativa, como solamente se observa el comportamiento del usuario, solamente se observan los artículos que consume y no aquellos que le "desagradan". En retroalimentación explícita, los menos agradables tienen un rating menor. 
+Otra diferencia es que en retroalimentación implícita no hay retroalimentación negativa, porque solamente se observa el comportamiento del usuario. Únicamente se observan los artículos que consume y no aquellos que le "desagradan". En retroalimentación explícita, los menos agradables tienen un rating menor. 
 
 En retroalimentación explícita el valor del rating indica preferencia, en implícita obtenemos confianza. Los valores de horas de videojuego por usuario nos describe la frecuencia de las acciones realizadas. En este caso, este dato nos otorga confianza en cada observación. Es muy probable que la recurrencia de un evento (horas jugadas) refleje la opinión del usuario.
 
@@ -47,7 +47,8 @@ Este trabajo desarrolla un modelo de filtrado colaborativo con retroalimentació
 
 El objetivo de este trabajo es realizar recomendaciones sobre videojuegos, de acuerdo con su experiencia en la plataforma. La recomendación toma como insumo el número de horas que los usuarios dedican a jugar algún videojuego en particular. 
 
-La estructura del trabajo es la siguiente: En la primera parte se hace una descripción de la base de datos utilizada y el procesamiento que se llevó a cabo para realizar un Split de entrenamiento y validación; la sección de Metodología explica el modelo de optimización para minimizar la función de pérdida por medio del algoritmo "Alternating Leas Suares (ALS)"; La evaluación explica la manera en que se genera un rango para obtener la recomendación; La sección de resultados muestra qué parámetros fueron otorgaron mejores resultados; por último, las conclusiones ofrecen recomendaciones sobre los resultados del modelo y aspectos a considerar del análisis.
+La estructura del trabajo es la siguiente: En la primera parte se hace una descripción de la base de datos utilizada y el procesamiento que se llevó a cabo para realizar un Split de entrenamiento y validación; la sección de Metodología explica el modelo de optimización para minimizar la función de pérdida por medio del algoritmo "Alternating Leas Suares (ALS), tomando en cuenta los ajustes de confianza"; La evaluación explica la manera en que se genera un rango para obtener la recomendación; La sección de resultados muestra qué parámetros fueron otorgaron mejores resultados; por último, las conclusiones ofrecen recomendaciones sobre los resultados del modelo y aspectos a considerar del análisis.
+
 
 # Base de datos
 
@@ -136,7 +137,7 @@ Nuestro sistema de recomendación se construye utilizando las horas jugadas por 
 Para este trabajo consideramos el índice $u,v$ para distinguir usuarios; los artículos están determinados por los subíndices $i,j$. De tal forma que podemos relacionar a los usuarios y los artículos mediante la relación $r_{u,i}$.  Esta relación representa la frecuencia de acciones sobre un artículo, por ejemplo, el número de compras en un sitio web, el número de veces que oprimimos la tecla "favoritos", clicks que damos a un producto en especial o el tiempo utilizamos para ver videos o escuchar música. La notación $r_{u,i}$ es una medida implícita para el usuario $u$ y el artículo $i$. En el contexto de recomendación implícita, $r_{u,i}$ son las observaciones que se tienen. Hay que notar que en la recomendación explícita estos valores serían llamados los "ratings" otorgados a los artículos. Aquí le llamamos observaciones.
 
 
-Para poner en contexto, $r_{u,i}$ puede indicar el número de ocasiones que el individuo $u$ adquiere el artículo $i$. O bien el tiempo que $u$ navega en el sitio web de $i$.En nuestro ejercicio, $r_{u,i}$ indica el tiempo que un individuo dedica a jugar un videojuego en específico.
+Para poner en contexto, $r_{u,i}$ inidca el número de ocasiones que el individuo $u$ adquiere el artículo $i$. O bien el tiempo que $u$ navega en el sitio web de $i$.En nuestro ejercicio, $r_{u,i}$ indica el tiempo que un individuo dedica a jugar un videojuego en específico.
 
 Para nuestro modelo, consideramos la variable binaria $p_{u,i}$ que nos indica la preferencia del usuario $u$ por un artículo $i$. 
 $$
