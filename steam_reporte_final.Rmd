@@ -43,7 +43,7 @@ Otra diferencia es que en retroalimentación implícita no hay retroalimentació
 
 En retroalimentación explícita el valor del rating indica preferencia, en implícita obtenemos confianza. Los valores de horas de videojuego por usuario nos describe la frecuencia de las acciones realizadas. En este caso, este dato nos otorga confianza en cada observación. Es muy probable que la recurrencia de un evento (horas jugadas) refleje la opinión del usuario.
 
-Este trabajo desarrolla un modelo de filtrado colaborativo con retroalimentación implícita, el cuál está inspirado en el artículo de [Collaborative FIltering for Implicit Feedback Datasets](http://yifanhu.net/PUB/cf.pdf) en el que desarrollan un algoritmo de sistema de recomendación de programas de televisión para el usuario final.
+Este trabajo desarrolla un modelo de filtrado colaborativo con retroalimentación implícita, el cuál está inspirado en el artículo de [Collaborative Filtering for Implicit Feedback Datasets](http://yifanhu.net/PUB/cf.pdf) en el que desarrollan un algoritmo de sistema de recomendación de programas de televisión para el usuario final.
 
 El objetivo de este trabajo es realizar recomendaciones sobre videojuegos, de acuerdo con su experiencia en la plataforma. La recomendación toma como insumo el número de horas que los usuarios dedican a jugar algún videojuego en particular. 
 
@@ -70,22 +70,26 @@ El conjunto de datos resultante está compuesto de 7.2 millones de observaciones
  
 Exploramos algunos datos de la tabla:
 
-```{r}
+```{r, echo = FALSE}
 cat_def <- read_rds('cache/cat_apps_def.rds')
 cat_limpio <- read_rds('cache/cat_apps_limpio.rds')
 dta_clean <- read_rds('cache/data_clean.rds')
+```
+
+
+```{r}
 head(dta_clean)
 ```
 
 Del total de los usuarios recolectados, se eliminaron aquellos que estaban registrados en la plataforma y tenían al menos algún videojuego registrado pero sin haberlo jugado. En ese sentido, se tienen 732,759 usuarios diferentes que interactúan con 4,133 videojuegos.
 
-```{r}
+```{r, echo=FALSE, eval=FALSE}
 dim(dta_clean)
 length(unique(dta_clean$steamid))
 length(unique(dta_clean$app_name))
 ```
 
-Respecto al número de minutos jugadas (playtime_forever), el resumen estadístico puede observarse a continuación:
+Respecto al número de minutos jugadas `playtime_forever` se calculan algunos percentiles:
 
 ```{r}
 summary(dta_clean$playtime_forever)
@@ -95,25 +99,26 @@ summary(dta_clean$playtime_forever)
 
 Los datos se dividen en un conjunto de entrenamiento que nos servirá para construir el modelo y otro de validación con el que evaluaremos las recomendaciones sugeridas.
 
-
-
-El set de validación se construye tomando los registros que pertenecen a la intersección de ambos conjuntos definidos anteriormente. Al ser la intersección, el porcentaje de la base conservado es aprox $ .5 *.5 = .25 = 25\% $.
+El set de validación se construye tomando los registros que pertenecen a la intersección de ambos conjuntos definidos anteriormente. Al ser la intersección, el porcentaje de la base conservado es aprox $.5 *.5 = .25 = 25\%$.
 
 El set de entrenamiento, entonces, se compone por todos los registros que NO pertenecen al set de validación.
 
-Para ello, se extraen de manera aleatoria 50% de los usuarios de la plataforma (`steamid`), y después se extraen de manera aleatoria el 50% de los videojuegos (`app_name`). El set de validación se construye tomando los registros que pertenecen a la intersección de ambos conjuntos definidos anteriormente. Al ser la intersección, el porcentaje de la base conservado es aprox $ .5 *.5 = .25 = 25\% $, equivalente a 1.78 millones de observaciones. El set de entrenamiento, entonces, se compone por todos los registros restantes que no pertenecen al set de validación y equivalen a 5.42 millones de observaciones.
+Para ello, se extraen de manera aleatoria 50% de los usuarios de la plataforma (`steamid`), y después se extraen de manera aleatoria el 50% de los videojuegos (`app_name`). El set de validación se construye tomando los registros que pertenecen a la intersección de ambos conjuntos definidos anteriormente. Al ser la intersección, el porcentaje de la base conservado es aprox $.5 *.5 = .25 = 25\%$, equivalente a 1.78 millones de observaciones. El set de entrenamiento, entonces, se compone por todos los registros restantes que no pertenecen al set de validación y equivalen a 5.42 millones de observaciones.
 
-```{r}
+```{r, echo=FALSE}
 dta_train <- read_rds('cache/dta_train.rds')
 dta_validation <- read_rds('cache/dta_validation.rds')
+```
+
+
+```{r, echo = FALSE, eval=FALSE}
 dim(dta_train)
 dim(dta_validation)
 ```
 
 Despúes de la separación, el conjunto de entrenamiento contiene 652,117 usuarios distintos y 4,115 videojuegos, mientras que el de validación tiene 270,827 usuarios y 2,038 videojuegos.
 
-```{r}
-knitr::opts_chunk$set(echo = FALSE)
+```{r, echo = FALSE}
 length(unique(dta_train$steamid))
 length(unique(dta_train$app_name))
 length(unique(dta_validation$steamid))
