@@ -1,5 +1,5 @@
 ---
-title: "Sistemas de Recomendación Implícita para videojuegos de plataforma Steam"
+title: "Sistemas de Recomendación Implícita: Juegos de Steam"
 author:
 - Carlos Bautista
 - Mario Heredia
@@ -118,7 +118,7 @@ dim(dta_validation)
 
 Despúes de la separación, el conjunto de entrenamiento contiene 652,117 usuarios distintos y 4,115 videojuegos, mientras que el de validación tiene 270,827 usuarios y 2,038 videojuegos.
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, eval= FALSE}
 length(unique(dta_train$steamid))
 length(unique(dta_train$app_name))
 length(unique(dta_validation$steamid))
