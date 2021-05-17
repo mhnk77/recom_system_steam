@@ -7,7 +7,6 @@ author:
 output:
   pdf_document: default
   html_document: default
-  pdf_document: default
 ---
 
 
@@ -209,54 +208,73 @@ Adicional a esto, para cada usuario se toma una muestra aleatoria de $n = 40$ de
 
 De esta manera, para cada usuario se calculan las predicciones del nivel de preferencia de los 40 juegos aleatorios que le fueron asignados, además de los juegos para los cuales se tiene información sobre el tiempo de juego.
 
-Como se explica en las notas y en el artículo de referencia, se calcula una métrica de evaluación llamada `rank`, la cual consiste en rankear los niveles de preferencia de todos los juegos, por usuario. Posteriormente, se calcula el percentil de cada observación, por usuario, de manera que los juegos con mayor preferencia predicha tienen un percentil más bajo, y vice versa. De esta manera, mientras mejor sea la predicción, menor será el valor de `rank`
+Como se explica anteriormente, se calcula una métrica de evaluación llamada `rank`, la cual consiste en rankear los niveles de preferencia de todos los juegos, por usuario. Posteriormente, se calcula el percentil de cada observación, por usuario, de manera que los juegos con mayor preferencia predicha tienen un percentil más bajo, y vice versa. De esta manera, mientras mejor sea la predicción, menor será el valor de `rank`
 
 Después, únicamente para los juegos que pertenecen al conjunto de prueba, se multiplica el número de horas jugadas por el percentil al cual corresponden. Y al final se divide entre el número total de horas jugadas.
-La idea intuitiva, es que, mientras más acierte el modelo en rankear correctamente los niveles de preferencia, más veces se multiplicarán por valores bajos de percentiles, obteniendo así mejores valores de "rank".
+La idea intuitiva, es que, mientras más acierte el modelo en rankear correctamente los niveles de preferencia, más veces se multiplicarán por valores bajos de percentiles, obteniendo así mejores valores de `rank`.
 
-Se conserva el modelo con mejor valor para la métrica de ajuste.
 
-Se corrieron XX configuraciones de modelos (y tabla)
+### Mejor modelo
 
-El mejor modelo: 
+Los combinaciones de parámetros probados, con sus respectivos valores de la métrica de desempeño se observan a continuación:
+
+```{r}
+knitr::include_graphics('imgs/modelos_probados_resultados.png')
+```
 
 Los parámetros que mejor funcionaron son los siguientes:
 
-| Parámetro | $\lambda$ |$\overline{rank}$|$\alpha$|
+| Parámetro | $\lambda$ |factores latentes|$\alpha$|
 |-----------|---------- |-----------------|--------|
-| Valor     |    150    |       80        |    1   |
+| Valor     |    150    |       160       |    1   |
 
 
-- EL parámetro Lambda $\lambda$ es el que más afecta los resultados. el $\overline{rank}$ si afecta pero no mucho. El valor de $\alpha$ fue el mejor 1 (default).
+Con un valor de $\overline{rank} = 0.171$
 
+Se observa lo siguiente:
 
-- Gráfica $\overline{rank}$ vs count (cero donde mejor lo hace), por lo tanto esperaríamos mayor densidad en valores cercanos a cero.
+- Afinar el parámetro $\lambda$ tuvo mayor impacto en el ajuste. El valor óptimo está alrededor de 150.
 
-- Para un usuario particular (id = 15), el que más jugó le dio una recomendación alta. Otros ejemplos donde usuario jugó poquito y le dio
+- El número de factores latentes tomados en el modelo tiene un impacto pequeño pero muy claro, mientras máyor sea, mejor es el ajuste. Sin embargo, este parámetro tiene un efecto considerable en el tiempo de ejecución, y las ganancias en el ajuste son marginales, por lo que 160 factores es suficiente.
 
-VALOR DE 0.17 y explicación
+- En cuanto $\alpha$, se probaron valores mayores o iguales a 1, y el más pequeño resultó ser el mejor. Es probable que el valor óptimo esté por debajo de 1.
 
-RECOMENDACIONES EXITOSAS DE ARTÍCULOS ESPECÍFICOS (tablas)
+### Visualización del mejor modelo
 
+Observemos la distribución de la medida `rank` a nivel usuario:
 
-
-```{r}
-table1 <- read_excel('cache/table1.xlsx')
-table2 <- read_excel('cache/table2.xlsx')
+```{r, fig.align='center'}
+knitr::include_graphics('imgs/histograma_ranks_usuario.pdf')
 ```
 
+### Ejemplos puntuales
+
+Observemos un ejemplo dónde el modelo predice bien los gustos del usuario.
+
+Se observa que en el conjunto de entrenamiento, el usuario jugó varias horas CounterStrike, un juego de disparos en primera persona
+
 ```{r}
-table1%>%
-  kbl(caption = "Número de factores latentes") %>%
-  kable_classic(full_width = F, html_font = "Cambria")
+knitr::include_graphics('imgs/ej_bueno_training.png')
+``` 
+
+Al predecir sus gustos, el modelo acierta correctamente en asignar los valores más altos de preferencia a CounterStrike: Source y CounterStrike: Global Offensive, que son continuaciones de su juego favorito en training.
+
+```{r}
+knitr::include_graphics('imgs/ej_bueno_testing.png')
 ```
 
+Un caso donde no hace tan buen trabajo es el siguiente usuario:
 
+En entrenamiento, se muestra que sus 2 juegos favoritos son juegos del tipo Arcade.
 
 ```{r}
-table2%>%
-  kbl(caption = "Resultados magic loop") %>%
-  kable_classic(full_width = F, html_font = "Cambria")
+knitr::include_graphics('imgs/ej_malo_training.png')
+```
+
+Sin embargo, al intentar predecir el valor, da un valor muy vajo a Big Money! Deluxe, el cual es similar a los juegos favoritos que vió en entrenamiento
+
+```{r}
+knitr::include_graphics('imgs/ej_malo_testing.png')
 ```
 
 # Conclusiones
@@ -276,7 +294,7 @@ Es necesario comprender las características particulares de la variable que se 
 
 Por otro lado, es importante mencionar que por limitaciones de tiempo y poder de procesamiento, tuvimos que hacer algunos sacrificios en la metodología. Para obtener un mejor ajuste y una métrica que refleje mejor el desempeño del modelo  en el mundo real, se recomienda:
 
-  - Tomar un conjunto mucho más grande tanto de usuarios, como de juegos evaluados para entrenar el modelo.
+  - Tomar un conjunto mucho más grande tanto de usuarios como de juegos evaluados para entrenar el modelo.
   - Aprovechar mejor la paralelización de Spark, utilizando un cluster de varios nodos para escalar el proceso.
   - Para cada usuario, obtener predicciones del nivel de gusto de un número mucho mayor de juegos, para tener un ranking más preciso.
   - Probar con incrementos más pequeños en los distintos hiperparámetros.
