@@ -1,13 +1,12 @@
 ---
 title: "Sistemas de Recomendación Implícita para videojuegos de plataforma Steam"
-
-
-author: 
+author:
 - Carlos Bautista
 - Mario Heredia
 - Miguel Reyes
 output:
   html_document: default
+  pdf_document: default
 ---
 
 
@@ -18,6 +17,10 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(tidyverse)
+library(DT)
+library(kableExtra)
+library(readxl)
 ```
 
 # Introducción
@@ -109,6 +112,7 @@ dim(dta_validation)
 Despúes de la separación, el conjunto de entrenamiento contiene 652,117 usuarios distintos y 4,115 videojuegos, mientras que el de validación tiene 270,827 usuarios y 2,038 videojuegos.
 
 ```{r}
+knitr::opts_chunk$set(echo = FALSE)
 length(unique(dta_train$steamid))
 length(unique(dta_train$app_name))
 length(unique(dta_validation$steamid))
@@ -233,8 +237,26 @@ VALOR DE 0.17 y explicación
 
 RECOMENDACIONES EXITOSAS DE ARTÍCULOS ESPECÍFICOS (tablas)
 
-ejemplo de FALLOS (tablas)
 
+
+```{r}
+table1 <- read_excel('cache/table1.xlsx')
+table2 <- read_excel('cache/table2.xlsx')
+```
+
+```{r}
+table1%>%
+  kbl(caption = "Número de factores latentes") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
+
+
+```{r}
+table2%>%
+  kbl(caption = "Resultados magic loop") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
 
 # Conclusiones
 
