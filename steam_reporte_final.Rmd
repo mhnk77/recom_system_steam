@@ -264,6 +264,7 @@ Un buen sistema de recomendación es crucial para capturar y retener la atenció
 
 En ese sentido, Steam es una plataforma que permite generar cantidades enormes de información, ya que, para poder utilizar el servicio es necesario estar registrado mediante la creación de una cuenta gratuita a la que se vinculan los juegos comprados por el jugador. Estos juegos pueden ser tanto los juegos que se ofrecen enla plataforma, como ciertos juegos comprados en tiendas físicas. 
 
+
 Para poder jugar, después de la instalación e iniciar sesión, la plataforma monitorea toda tu actividad. Aunque en steam es posible comprar un juego y regalarlo, eso no quita validez a la investigación, porque la variable que se mide son las horas jugadas por videojuego, no los juegos comprados.
 
 Cuando se utilizan evaluaciones implícitas, es necesario recolectar y procesar cantidades enormes de información, por lo que el poder computacional y la optimización de algoritmos se vuelven un punto clave en el proceso.
