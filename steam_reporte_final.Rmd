@@ -151,6 +151,10 @@ Para corregir este sesgo binario, tenemos que considerar que nuestras creencias 
 
 Para los individuos tenemos distintos niveles de confianza entre los bienes que se consumen, incluso entre los elementos que son preferidos por el usuario. En general si $r_{u,i}$ crece, es un indicador que el usuario tiene mayor prefrencia por el artículo.
 
+
+$$r_{u,i}$$
+
+
 Para saber qué tanto valor debemos darle a la preferencia, necesitamos modelar un nivel de confianza del usuario por algún producto. La confianza la medimos de la siguiente forma: 
 $$C_{ui} = 1+ \alpha r_{ui}$$
 Así obtenemos una confianza mínima en $p_{u,i}$
@@ -162,7 +166,7 @@ $\alpha$ es un parámetro constante de la tasa de incremento de la variable. Es 
 Asumimos que las preferencias son el producto punto de $p_{u,i}\;=\;x_u^Ty_i$. Estos vectores corresponden al usuario $u$ y al artículo $i$
  
 Estos dos vectores son referentes a los usuarios y los productos. Deseamos compararlos directamente. Esta técnica es similar a la factorización de matrices que se realiza en recomendación explícita, pero con dos distinciones importantes: a) Necesitamos tomar en cuenta la variedad de los niveles de confianza $(C_{u,i})$; b) La optimización debe considerar todos los posibles pares de $u,i$, no solamente los observados. De acuerdo con esto, la función de pérdida que debe ser minimizada se ve de la siguiente forma: 
-$$ \min_{x*,y*}\sum_{u,i} C_{u,i}(r_{u,i}-x_u^Ty_i)^2 \;+\; \lambda(\sum_{u}\|x_u\|^2\;+\;\sum_{i}\|y_u\|^2)$$
+$$ \min_{x*,y*}\sum_{u,i} C_{u,i}(p_{u,i}-x_u^Ty_i)^2 \;+\; \lambda(\sum_{u}\|x_u\|^2\;+\;\sum_{i}\|y_u\|^2)$$
 Donde $\lambda(\sum_{u}\|x_u\|^2\;+\;\sum_{i}\|y_u\|^2)$ es un parámetro de regularización y se hace una normalización para evitar el sobreajuste. $\lambda$ es uno de los parámetros que hay que ajustar.
 
 La función de pérdida que queremos minimizar contiene $m.n$ términos, donde $m$ es el número de usuarios y $n$ es el número de artículos. Esto implica que tenemos un número grande de términos que no podemos optimizar directamente con técnicas de optimización comunes como descenso en gradiente estocástico. Para optimizar utilizamos el algoritmo de Mínimos Cuadrados Alternados (ALS)
