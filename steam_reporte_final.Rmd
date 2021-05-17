@@ -237,30 +237,22 @@ ejemplo de FALLOS (tablas)
 
 
 # Conclusiones
-Rankear los niveles de preferencia de los videojuegos para calcular percentiles permite obtener una evaluación consistente de las preferencias de los usuarios. 
 
+Un buen sistema de recomendación es crucial para capturar y retener la atención de los usuarios dentro de una aplicación o sitio web o plataforma.Para construir un buen sistema, es necesario tomar en cuenta varios acercamientos, uno de estos es cuantificar las formas que tiene un usuario de interactuar con la plataforma. 
 
-CONCLUSIONES SOBRE RESULTADOS
-notas. 
+En ese sentido, Steam es una plataforma que permite generar cantidades enormes de información, ya que, para poder utilizar el servicio es necesario estar registrado mediante la creación de una cuenta gratuita a la que se vinculan los juegos comprados por el jugador. Estos juegos pueden ser tanto los juegos que se ofrecen enla plataforma, como ciertos juegos comprados en tiendas físicas. 
 
-EFECTOS OBSERVADOS DE PARÁMETROS
+Para poder jugar, después de la instalación e iniciar sesión, la plataforma monitorea toda tu actividad. Aunque en steam es posible comprar un juego y regalarlo, eso no quita validez a la investigación, porque la variable que se mide son las horas jugadas por videojuego, no los juegos comprados.
 
-DIFERENCIAS ESPECÍFICAS SOBRE RECOMENDACIÓN DE VIDEOJUEGOS Y PELICULAS (CONTEXTO)
-Ver paper.
+Cuando se utilizan evaluaciones implícitas, es necesario recolectar y procesar cantidades enormes de información, por lo que el poder computacional y la optimización de algoritmos se vuelven un punto clave en el proceso.
 
-Hay diferencias inherentes desde la recolección de los datos en Steam vs otras plataformas. Steam es una plataforma de distribución digital que te permite descargar jeugos. Para poder utilizar el servicio es necesario estar registrado mediante la creación de una cuenta gratuita a la que se vinculan los juegos comprados por el jugador. Estos juegos pueden ser tanto los juegos que se ofrecen enla plataforma, como ciertos juegos comprados en tiendas físicas. Para poder jugar, después de la instalación e iniciar sesión, la plataforma monitorea toda tu actividad. Aunque en steam es posible comprar un juego y regalarlo, eso no quita validez a la investigación, porque la variable que se mide son las horas jugadas por videojuego, no los juegos comprados.
+En la evaluación de sistemas de recomendación implícitos, rankear los niveles de preferencia de los videojuegos para calcular percentiles permite obtener una evaluación consistente de las preferencias de los usuarios. 
 
+Es necesario comprender las características particulares de la variable que se toma como calificación implícita. Puede ser necesario realizar modificaciones.
 
-FUTURAS LINEAS DE INVESTIGACIÓN (RETOS PARA EL EQUIPO)
-En general el tamaño de datos, limitaciones de cómputo (más usuarios, más juegos, etc.)
+Por otro lado, es importante mencionar que por limitaciones de tiempo y poder de procesamiento, tuvimos que hacer algunos sacrificios en la metodología. Para obtener un mejor ajuste y una métrica que refleje mejor el desempeño del modelo  en el mundo real, se recomienda:
 
-
-**PENDIENTES**
-
-CBP: INCORPORAR NOTAS DE MARIO Y AFINAR ESTILO Y REDACCIÓN
-
-MRR: INTRODUCCIÓN Y COMENTARIOS A SECCIÓN DE MODELO
-
-MHT: RESULTADOS
-
-TODOS: IDEAS PARA CONCLUSIONES
+  - Tomar un conjunto mucho más grande tanto de usuarios, como de juegos evaluados para entrenar el modelo.
+  - Aprovechar mejor la paralelización de Spark, utilizando un cluster de varios nodos para escalar el proceso.
+  - Para cada usuario, obtener predicciones del nivel de gusto de un número mucho mayor de juegos, para tener un ranking más preciso.
+  - Probar con incrementos más pequeños en los distintos hiperparámetros.
