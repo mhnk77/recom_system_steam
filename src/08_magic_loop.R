@@ -59,12 +59,20 @@ guarda_preds <- function(alpha_val = 40, rank_val = 20, lambda_val = 1){
   
 }
 
-model_grid <- expand.grid(alphas = c(1),  ranks =  c(20,80), lambdas = c(1,150,500)) %>% 
-  bind_rows(tibble(alphas = 1, ranks = 160, lambdas = 150)) %>% 
-  tail(6)
+# model_grid <- expand.grid(alphas = c(1),  ranks =  c(20,80), lambdas = c(1,150,500)) %>% 
+#   bind_rows(tibble(alphas = 1, ranks = 160, lambdas = 150)) %>% 
+#   tail(6)
+# 
+# pmap(.l  = list(model_grid$alphas, model_grid$ranks, model_grid$lambdas),
+#      .f = guarda_preds)
 
-pmap(.l  = list(model_grid$alphas, model_grid$ranks, model_grid$lambdas),
-     .f = guarda_preds)
+# Segunda vuelta ----------------------------------------------------------
+
+# model_grid <- expand.grid(alphas = c(40),  ranks =  c(80), lambdas = c(150,250))
+# 
+# pmap(.l  = list(model_grid$alphas, model_grid$ranks, model_grid$lambdas),
+#      .f = guarda_preds)
 
 
+guarda_preds(10,160,250)
 
