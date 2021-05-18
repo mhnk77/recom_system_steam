@@ -5,3 +5,6 @@
 data/
 .Rproj
 .python-version
+cache/predictions_results/
+cache/sandbox/
+logs/
