@@ -224,7 +224,7 @@ La idea intuitiva, es que, mientras más acierte el modelo en rankear correctame
 
 Los combinaciones de parámetros probados, con sus respectivos valores de la métrica de desempeño se observan a continuación:
 
-```{r}
+```{r, echo=FALSE, out.height= "50%", out.width= "50%"}
 knitr::include_graphics('imgs/modelos_probados_resultados.png')
 ```
 
@@ -249,7 +249,7 @@ Se observa lo siguiente:
 
 Observemos la distribución de la medida `rank` a nivel usuario:
 
-```{r, fig.align='center'}
+```{r, echo=FALSE, fig.align='center'}
 knitr::include_graphics('imgs/histograma_ranks_usuario.pdf')
 ```
 
@@ -259,13 +259,13 @@ Observemos un ejemplo dónde el modelo predice bien los gustos del usuario.
 
 Se observa que en el conjunto de entrenamiento, el usuario jugó varias horas CounterStrike, un juego de disparos en primera persona
 
-```{r}
+```{r, echo=FALSE, out.height= "50%", out.width= "50%"}
 knitr::include_graphics('imgs/ej_bueno_training.png')
 ``` 
 
 Al predecir sus gustos, el modelo acierta correctamente en asignar los valores más altos de preferencia a CounterStrike: Source y CounterStrike: Global Offensive, que son continuaciones de su juego favorito en training.
 
-```{r}
+```{r, echo=FALSE, out.height= "80%", out.width= "80%"}
 knitr::include_graphics('imgs/ej_bueno_testing.png')
 ```
 
@@ -273,13 +273,13 @@ Un caso donde no hace tan buen trabajo es el siguiente usuario:
 
 En entrenamiento, se muestra que sus 2 juegos favoritos son juegos del tipo Arcade.
 
-```{r}
+```{r, echo=FALSE, out.height= "50%", out.width= "50%"}
 knitr::include_graphics('imgs/ej_malo_training.png')
 ```
 
 Sin embargo, al intentar predecir el valor, da un valor muy vajo a Big Money! Deluxe, el cual es similar a los juegos favoritos que vió en entrenamiento
 
-```{r}
+```{r, echo=FALSE, out.height= "80%", out.width= "80%"}
 knitr::include_graphics('imgs/ej_malo_testing.png')
 ```
 
