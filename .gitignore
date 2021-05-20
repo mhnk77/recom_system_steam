@@ -8,3 +8,4 @@ data/
 cache/predictions_results/
 cache/sandbox/
 logs/
+.log
